@@ -9,6 +9,8 @@ import android.net.Uri
 import android.provider.CalendarContract.Colors
 import android.view.MenuItem
 import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -43,6 +45,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
+import coil.compose.rememberImagePainter
+import ir.nimaali.nimafooddeliveryapp.data.seller.SellerFoodRequestGroup
 import ir.nimaali.nimafooddeliveryapp.ui.theme.BackgroundColor
 import ir.nimaali.nimafooddeliveryapp.ui.theme.PrimaryColor
 import ir.nimaali.nimafooddeliveryapp.ui.theme.SurfaceColor
@@ -59,26 +63,27 @@ fun SellerAddFoodScreen(navController: NavHostController) {
     val imageUri = remember { mutableStateOf<Uri?>(null) }
     val context = LocalContext.current
 
-    fun pickImage() {
-        val intent = Intent(Intent.ACTION_PICK).apply {
-            type = "image/*"
+    // Image picker launcher
+    val launcher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent(),
+        onResult = { uri: Uri? ->
+            imageUri.value = uri
         }
-        (context as Activity).startActivityForResult(intent, 100) // برای انتخاب تصویر
-    }
+    )
 
     fun submitForm() {
-        if (name.value.isEmpty() || price.value.isEmpty()) {
+        if (name.value.isEmpty() || price.value.isEmpty() || imageUri.value == null) {
             Toast.makeText(context, "لطفا تمام فیلدها را پر کنید", Toast.LENGTH_SHORT).show()
             return
         }
 
         val foodName = name.value
         val foodDescription = description.value
-        val foodPrice = price.value.toDoubleOrNull() ?: 0.0
-        val imagePath = imageUri.value?.path ?: ""
+        val foodPrice = price.value
+        SellerFoodRequestGroup(context).addSellerFood(foodName,foodDescription,foodPrice,imageUri.value)
 
-        // ارسال داده‌ها به سرور
         Toast.makeText(context, "غذا با موفقیت افزوده شد", Toast.LENGTH_SHORT).show()
+        navController.popBackStack()
     }
 
     Scaffold(
@@ -117,12 +122,7 @@ fun SellerAddFoodScreen(navController: NavHostController) {
             OutlinedTextField(
                 value = name.value,
                 onValueChange = { name.value = it },
-                label = {
-                    Text(
-                        "نام غذا",
-                        fontFamily = vazirFontFamily
-                    )
-                },
+                label = { Text("نام غذا", fontFamily = vazirFontFamily) },
                 modifier = Modifier.fillMaxWidth()
             )
             Spacer(modifier = Modifier.height(16.dp))
@@ -130,12 +130,7 @@ fun SellerAddFoodScreen(navController: NavHostController) {
             OutlinedTextField(
                 value = description.value,
                 onValueChange = { description.value = it },
-                label = {
-                    Text(
-                        "توضیحات غذا",
-                        fontFamily = vazirFontFamily
-                    )
-                },
+                label = { Text("توضیحات غذا", fontFamily = vazirFontFamily) },
                 modifier = Modifier.fillMaxWidth(),
                 maxLines = 4
             )
@@ -144,33 +139,32 @@ fun SellerAddFoodScreen(navController: NavHostController) {
             OutlinedTextField(
                 value = price.value,
                 onValueChange = { price.value = it },
-                label = {
-                    Text(
-                        "قیمت غذا",
-                        fontFamily = vazirFontFamily
-                    )
-                },
+                label = { Text("قیمت غذا", fontFamily = vazirFontFamily) },
                 modifier = Modifier.fillMaxWidth(),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
             )
             Spacer(modifier = Modifier.height(16.dp))
 
-//            imageUri.value?.let {
-//                Image(
-//                    painter = rememberImagePainter(it),
-//                    contentDescription = null,
-//                    modifier = Modifier
-//                        .fillMaxWidth()
-//                        .height(200.dp)
-//                )
-//            } ?: Button(onClick = { pickImage() }) {
-//                Text("انتخاب تصویر غذا")
-//            }
+            // Display image or prompt to select one
+            imageUri.value?.let {
+                Image(
+                    painter = rememberImagePainter(it),
+                    contentDescription = null,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(230.dp)
+                )
+            } ?: Button(
+                onClick = { launcher.launch("image/*") },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("انتخاب تصویر غذا")
+            }
             Spacer(modifier = Modifier.height(16.dp))
 
             Button(
                 modifier = Modifier.fillMaxWidth(),
-                onClick = { submitForm() },
+                onClick = { submitForm() }
             ) {
                 Text(
                     "افزودن غذا",

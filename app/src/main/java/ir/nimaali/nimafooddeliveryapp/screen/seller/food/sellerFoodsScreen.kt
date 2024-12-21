@@ -40,35 +40,44 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
+import ir.nimaali.nimafooddeliveryapp.data.seller.SellerFoodRequestGroup
+import ir.nimaali.nimafooddeliveryapp.models.home.Restaurant
+import ir.nimaali.nimafooddeliveryapp.models.seller.Food
+import ir.nimaali.nimafooddeliveryapp.screen.functions.LoadingProgressbar
 import ir.nimaali.nimafooddeliveryapp.ui.theme.BackgroundColor
 import ir.nimaali.nimafooddeliveryapp.ui.theme.PrimaryColor
 import ir.nimaali.nimafooddeliveryapp.ui.theme.SurfaceColor
 import ir.nimaali.nimafooddeliveryapp.ui.theme.vazirFontFamily
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-data class Food(
-    val name: String,
-    val type: String,
-    val price: Double
-)
 
-val foods = listOf(
-    Food("همبرگر", "Fast Food", 25000.0),
-    Food("پاستا", "غذای اصلی", 35000.0),
-    Food("کیک شکلاتی", "دسر", 15000.0),
-    Food("پیتزا", "Fast Food", 45000.0),
-    Food("پاستا", "غذای اصلی", 35000.0),
-    Food("کیک شکلاتی", "دسر", 15000.0),
-    Food("پیتزا", "Fast Food", 45000.0),
-    Food("پاستا", "غذای اصلی", 35000.0),
-    Food("کیک شکلاتی", "دسر", 15000.0),
-    Food("پیتزا", "Fast Food", 45000.0),
-    Food("سالاد", "پیش‌غذا", 20000.0)
-)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SellerFoodListScreen(navHostController: NavHostController) {
+
+    var isDeleteDialogOpen by remember { mutableStateOf(false) }
+    var selected_item_id by remember { mutableStateOf(0) }
+
+
+    var listFoods by remember {
+        mutableStateOf(emptyList<Food>())
+    }
+
+    var onGoingProgress by remember {
+        mutableStateOf(true)
+    }
+
+    val m_context = LocalContext.current
+
+    val seller_food_request_group = SellerFoodRequestGroup(m_context)
+
+    seller_food_request_group.showSellerFoods { _, it ->
+        listFoods = it.foods
+        onGoingProgress = false
+    }
+
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -84,7 +93,9 @@ fun SellerFoodListScreen(navHostController: NavHostController) {
                 },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = Color(0xFF4CAF50)),
                 actions = {
-                    IconButton(onClick = { /* Action for back */ }) {
+                    IconButton(onClick = {
+                        navHostController.popBackStack()
+                    }) {
                         Icon(
                             Icons.Default.Close,
                             contentDescription = "برگشت",
@@ -96,68 +107,134 @@ fun SellerFoodListScreen(navHostController: NavHostController) {
             )
         }
     ) { innerPadding ->
-        LazyColumn(
-            modifier = Modifier
-                .padding(innerPadding)
-                .padding(16.dp)
-        ) {
-            items(foods) { food ->
-                Card(
-                    modifier = Modifier
-                        .padding(vertical = 8.dp)
-                        .fillMaxWidth(),
-                    elevation = CardDefaults.cardElevation(4.dp)
-                ) {
-                    Column(modifier = Modifier.padding(8.dp)) {
-                        ListItem(
-                            headlineContent = {
-                                Text(
-                                    text = food.name,
-                                    style = MaterialTheme.typography.bodyLarge
-                                )
-                            },
-                            supportingContent = {
-                                Text(
-                                    text = food.type,
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    fontFamily = vazirFontFamily
-                                )
-                            },
-                            trailingContent = {
-                                Text(
-                                    text = "${food.price} تومان",
-                                    color = Color(0xFF4CAF50),
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    fontFamily = vazirFontFamily
-                                )
-                            },
-                            modifier = Modifier.padding(8.dp)
-                        )
 
-                        // دکمه‌های ویرایش و حذف
-                        Row(
-                            horizontalArrangement = Arrangement.End,
-                            modifier = Modifier.fillMaxWidth()
+        if (onGoingProgress) {
+
+            LoadingProgressbar {
+
+            }
+
+        } else {
+            if (listFoods.isEmpty()) {
+                Column(
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier.fillMaxSize()
+                ) {
+                    Text(
+                        "رستورانی در شهر شما قابل ارائه سرویس نمی باشد!",
+                        color = MaterialTheme.colorScheme.error
+                    )
+
+
+                }
+            } else {
+                LazyColumn(
+                    modifier = Modifier
+                        .padding(innerPadding)
+                        .padding(16.dp)
+                ) {
+                    items(listFoods) { food ->
+                        Card(
+                            modifier = Modifier
+                                .padding(vertical = 8.dp)
+                                .fillMaxWidth(),
+                            elevation = CardDefaults.cardElevation(4.dp)
                         ) {
-                            IconButton(onClick = { /* Handle Edit */ }) {
-                                Icon(
-                                    imageVector = Icons.Default.Edit,
-                                    contentDescription = "ویرایش",
-                                    tint = Color.Blue
+                            Column(modifier = Modifier.padding(8.dp)) {
+                                ListItem(
+                                    headlineContent = {
+                                        Text(
+                                            text = food.name,
+                                            style = MaterialTheme.typography.bodyLarge
+                                        )
+                                    },
+                                    supportingContent = {
+                                        Text(
+                                            text = food.description,
+                                            style = MaterialTheme.typography.bodyMedium,
+                                            fontFamily = vazirFontFamily
+                                        )
+                                    },
+                                    trailingContent = {
+                                        Text(
+                                            text = "${food.price} تومان",
+                                            color = Color(0xFF4CAF50),
+                                            style = MaterialTheme.typography.bodyMedium,
+                                            fontFamily = vazirFontFamily
+                                        )
+                                    },
+                                    modifier = Modifier.padding(8.dp)
                                 )
-                            }
-                            Spacer(modifier = Modifier.width(8.dp))
-                            IconButton(onClick = { /* Handle Delete */ }) {
-                                Icon(
-                                    imageVector = Icons.Default.Delete,
-                                    contentDescription = "حذف",
-                                    tint = Color.Red
-                                )
+
+                                // دکمه‌های ویرایش و حذف
+                                Row(
+                                    horizontalArrangement = Arrangement.End,
+                                    modifier = Modifier.fillMaxWidth()
+                                ) {
+                                    IconButton(onClick = {
+                                        isDeleteDialogOpen = true
+                                        selected_item_id = food.id
+                                    }) {
+                                        Icon(
+                                            imageVector = Icons.Default.Delete,
+                                            contentDescription = "حذف",
+                                            tint = Color.Red
+                                        )
+                                    }
+                                    Spacer(modifier = Modifier.width(8.dp))
+                                    IconButton(onClick = {
+                                        selected_item_id = food.id
+                                        navHostController.navigate("seller/edit/food/$selected_item_id")
+                                    }) {
+                                        Icon(
+                                            imageVector = Icons.Default.Edit,
+                                            contentDescription = "ویرایش",
+                                            tint = Color.DarkGray
+                                        )
+                                    }
+                                }
                             }
                         }
                     }
                 }
             }
+
+            if (isDeleteDialogOpen) {
+                AlertDialog(
+                    onDismissRequest = {
+                        // بستن دیالوگ در صورت نیاز
+                        isDeleteDialogOpen = false
+                    },
+                    title = {
+                        Text(text = "آیا مطمئن هستید؟") // عنوان دیالوگ
+                    },
+                    text = {
+                        Text(text = "این آیتم حذف خواهد شد. این عمل قابل بازگشت نیست.") // متن توضیحی دیالوگ
+                    },
+                    confirmButton = {
+                        TextButton(onClick = {
+                            seller_food_request_group.deleteSellerFoods(selected_item_id.toString()) {
+                                seller_food_request_group.showSellerFoods { _, it ->
+                                    listFoods = it.foods
+                                    onGoingProgress = false
+                                }
+                            }
+                            isDeleteDialogOpen = false // دیالوگ را ببندید
+                        }) {
+                            Text(text = "بله", color = Color.Red) // دکمه تایید حذف
+                        }
+                    },
+                    dismissButton = {
+                        TextButton(onClick = {
+                            isDeleteDialogOpen = false // بستن دیالوگ بدون حذف
+                        }) {
+                            Text(text = "خیر") // دکمه لغو حذف
+                        }
+                    }
+                )
+            }
+
         }
     }
 }

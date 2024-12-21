@@ -27,6 +27,7 @@ import ir.nimaali.nimafooddeliveryapp.screen.seller.order.SellerOrderHistoryScre
 import ir.nimaali.nimafooddeliveryapp.screen.user.edit.EditUserScreen
 import ir.nimaali.nimafooddeliveryapp.screen.user.UserHomeScreen
 import ir.nimaali.nimafooddeliveryapp.screen.user.edit.EditUserPasswordScreen
+import ir.nimaali.nimafooddeliveryapp.screen.user.food.UserDetailRestaurantScreen
 import ir.nimaali.nimafooddeliveryapp.ui.theme.NimaFoodDeliveryAppTheme
 
 class MainActivity : ComponentActivity() {
@@ -72,6 +73,13 @@ class MainActivity : ComponentActivity() {
                             EditUserPasswordScreen(navController)
                         }
 
+
+                        //restaurant
+                        composable("home/restaurant/{restaurant_id}") {navBackStackEntry->
+                            val restaurant_id=navBackStackEntry.arguments!!.getString("restaurant_id")
+                            UserDetailRestaurantScreen(navController,restaurant_id.toString())
+                        }
+
                         //seller
                         composable("dashboard_seller") {
                             SellerDashboardScreen(navController)
@@ -85,8 +93,9 @@ class MainActivity : ComponentActivity() {
                             SellerAddFoodScreen(navController)
                         }
 
-                        composable("seller/edit/food") {
-                            SellerEditFoodScreen(navController)
+                        composable("seller/edit/food/{food_id}") {navBackStackEntry->
+                            val food_it=navBackStackEntry.arguments!!.getString("food_id")
+                            SellerEditFoodScreen(food_it.toString(),navController)
                         }
 
                         composable("seller/food/detail") {

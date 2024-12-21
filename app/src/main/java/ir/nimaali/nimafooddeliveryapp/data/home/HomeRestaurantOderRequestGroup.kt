@@ -18,7 +18,7 @@ class HomeRestaurantOderRequestGroup(val m_context: Context) {
         result: (success: Boolean,homePageRestaurant: HomePageRestaurant) -> Unit,
     ) {
         val jsonRequest = object : JsonObjectRequest(
-            Method.POST, RequestEndPoints.userRestaurants,
+            Method.GET, RequestEndPoints.userRestaurants,
             JSONObject(),
             { response ->
                 try {

@@ -1,5 +1,7 @@
 package ir.nimaali.nimafooddeliveryapp.screen.seller.food
 
+import ir.nimaali.nimafooddeliveryapp.screen.functions.LoadingProgressbar
+
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
@@ -8,6 +10,8 @@ import android.net.Uri
 import android.provider.CalendarContract.Colors
 import android.view.MenuItem
 import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -42,6 +46,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
+import coil.compose.rememberImagePainter
+import ir.nimaali.nimafooddeliveryapp.data.home.HomeRestaurantOderRequestGroup
+import ir.nimaali.nimafooddeliveryapp.data.seller.SellerFoodRequestGroup
+import ir.nimaali.nimafooddeliveryapp.models.home.Restaurant
+import ir.nimaali.nimafooddeliveryapp.models.seller.Foods
 import ir.nimaali.nimafooddeliveryapp.ui.theme.BackgroundColor
 import ir.nimaali.nimafooddeliveryapp.ui.theme.PrimaryColor
 import ir.nimaali.nimafooddeliveryapp.ui.theme.SurfaceColor
@@ -52,20 +61,38 @@ import kotlinx.coroutines.withContext
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SellerEditFoodScreen(
+    foodId: String,
     navController: NavHostController
 ) {
-    val name = remember { mutableStateOf("name") }
-    val description = remember { mutableStateOf("description") }
-    val price = remember { mutableStateOf("456454") }
-//    val imageUri = remember { mutableStateOf("f") }
     val context = LocalContext.current
 
-    fun pickImage() {
-        val intent = Intent(Intent.ACTION_PICK).apply {
-            type = "image/*"
-        }
-        (context as Activity).startActivityForResult(intent, 100) // برای انتخاب تصویر
+    var loading by remember {
+        mutableStateOf(true)
     }
+    val sellerFoodRequestGroup = SellerFoodRequestGroup(context)
+
+
+    var name = remember { mutableStateOf("") }
+    var description = remember { mutableStateOf("") }
+    var price = remember { mutableStateOf("") }
+    val imageUri = remember { mutableStateOf<Uri?>(null) }
+
+    // : مقادیر اولیه غذا با استفاده از foodId از سرور یا پایگاه داده دریافت می‌شوند
+
+    sellerFoodRequestGroup.getSellerFoodById(foodId) { success, food_item ->
+        loading = false
+
+        name.value = food_item.foods.name
+        description.value = food_item.foods.description
+        price.value = food_item.foods.price.toString()
+    }
+    // Image picker launcher
+    val launcher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent(),
+        onResult = { uri: Uri? ->
+            imageUri.value = uri
+        }
+    )
 
     fun submitForm() {
         if (name.value.isEmpty() || price.value.isEmpty()) {
@@ -75,13 +102,18 @@ fun SellerEditFoodScreen(
 
         val foodName = name.value
         val foodDescription = description.value
-        val foodPrice = price.value.toDoubleOrNull() ?: 0.0
-//        val imagePath = imageUri.value?.path ?: ""
+        val foodPrice = price.value
+        val selectedImageUri = imageUri.value
 
-        // ارسال داده‌های ویرایش شده به سرور
-        Toast.makeText(context, "تغییرات ذخیره شد", Toast.LENGTH_SHORT).show()
+        sellerFoodRequestGroup.editSellerFood(
+            foodId,
+            foodName,
+            foodDescription,
+            foodPrice,
+            selectedImageUri
+        )
 
-        // بازگشت به صفحه قبلی
+        Toast.makeText(context, "غذا با موفقیت ویرایش شد", Toast.LENGTH_SHORT).show()
         navController.popBackStack()
     }
 
@@ -112,78 +144,74 @@ fun SellerEditFoodScreen(
             )
         }
     ) { padding ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding)
-                .padding(16.dp)
-        ) {
-            OutlinedTextField(
-                value = name.value,
-                onValueChange = { name.value = it },
-                label = {
-                    Text(
-                        "نام غذا",
-                        fontFamily = vazirFontFamily
-                    )
-                },
-                modifier = Modifier.fillMaxWidth()
-            )
-            Spacer(modifier = Modifier.height(16.dp))
 
-            OutlinedTextField(
-                value = description.value,
-                onValueChange = { description.value = it },
-                label = {
-                    Text(
-                        "توضیحات غذا",
-                        fontFamily = vazirFontFamily
-                    )
-                },
-                modifier = Modifier.fillMaxWidth(),
-                maxLines = 4
-            )
-            Spacer(modifier = Modifier.height(16.dp))
+        if (loading) {
 
-            OutlinedTextField(
-                value = price.value,
-                onValueChange = { price.value = it },
-                label = {
-                    Text(
-                        "قیمت غذا",
-                        fontFamily = vazirFontFamily
-                    )
-                },
-                modifier = Modifier.fillMaxWidth(),
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
-            )
-            Spacer(modifier = Modifier.height(16.dp))
+            LoadingProgressbar {
+            }
 
-//            imageUri.value?.let {
-//                Image(
-//                    painter = rememberImagePainter(it),
-//                    contentDescription = null,
-//                    modifier = Modifier
-//                        .fillMaxWidth()
-//                        .height(200.dp)
-//                        .clip(RoundedCornerShape(8.dp))
-//                )
-//            } ?: Button(onClick = { pickImage() }) {
-//                Text("انتخاب تصویر غذا")
-//            }
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            Button(
-                modifier = Modifier.fillMaxWidth(),
-                onClick = { submitForm() },
+        } else {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(padding)
+                    .padding(16.dp)
             ) {
-                Text(
-                    "ذخیره تغییرات",
-                    color = Color.White,
-                    fontFamily = vazirFontFamily,
-                    style = MaterialTheme.typography.headlineSmall
+                OutlinedTextField(
+                    value = name.value,
+                    onValueChange = { name.value = it },
+                    label = { Text("نام غذا", fontFamily = vazirFontFamily) },
+                    modifier = Modifier.fillMaxWidth()
                 )
+                Spacer(modifier = Modifier.height(16.dp))
+
+                OutlinedTextField(
+                    value = description.value,
+                    onValueChange = { description.value = it },
+                    label = { Text("توضیحات غذا", fontFamily = vazirFontFamily) },
+                    modifier = Modifier.fillMaxWidth(),
+                    maxLines = 4
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+
+                OutlinedTextField(
+                    value = price.value,
+                    onValueChange = { price.value = it },
+                    label = { Text("قیمت غذا", fontFamily = vazirFontFamily) },
+                    modifier = Modifier.fillMaxWidth(),
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // Display image or prompt to select one
+                imageUri.value?.let {
+                    Image(
+                        painter = rememberImagePainter(it),
+                        contentDescription = null,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(230.dp)
+                    )
+                } ?: Button(
+                    onClick = { launcher.launch("image/*") },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text("انتخاب تصویر جدید")
+                }
+                Spacer(modifier = Modifier.height(16.dp))
+
+                Button(
+                    modifier = Modifier.fillMaxWidth(),
+                    onClick = { submitForm() }
+                ) {
+                    Text(
+                        "ذخیره تغییرات",
+                        color = Color.White,
+                        fontFamily = vazirFontFamily,
+                        style = MaterialTheme.typography.headlineSmall
+                    )
+                }
+
             }
 
         }

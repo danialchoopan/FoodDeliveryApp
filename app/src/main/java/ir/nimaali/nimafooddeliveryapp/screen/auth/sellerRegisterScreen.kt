@@ -21,11 +21,13 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import ir.nimaali.nimafooddeliveryapp.ui.theme.BackgroundColor
 import ir.nimaali.nimafooddeliveryapp.ui.theme.PrimaryColor
 import ir.nimaali.nimafooddeliveryapp.ui.theme.SurfaceColor
 import ir.nimaali.nimafooddeliveryapp.ui.theme.vazirFontFamily
+import ir.nimaali.nimafooddeliveryapp.viewmodel.AuthUserSellerViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
@@ -47,6 +49,13 @@ fun SellerRegisterScreen(navController: NavController) {
     // لیست شهرستان‌ها و دسته‌بندی‌ها
     val cities = listOf("مشهد", "سبزوار", "نیشابور", "تربت حیدریه", "کاشمر")
     val categories = listOf("رستوران", "فست‌فود", "کافه", "شیرینی‌فروشی")
+
+
+    //auth
+    val authUserViewModel: AuthUserSellerViewModel = viewModel()
+
+    //context
+    val m_context= LocalContext.current
 
     Scaffold(
         modifier = Modifier.background(color = BackgroundColor),
@@ -206,15 +215,19 @@ fun SellerRegisterScreen(navController: NavController) {
                 Button(
                     onClick = {
                         if (password == confirmPassword && selectedCategory != null) {
-//                            registerSeller(
-//                                restaurantName = restaurantName,
-//                                sellerName = sellerName,
-//                                phone = phone,
-//                                seller_password = password,
-//                                city = selectedCity,
-//                                category = selectedCategory!!,
-//                                address = address
-//                            )
+                            authUserViewModel.sellerRegisterRequest(
+                                m_context,
+                                restaurantName,
+                                selectedCategory!!,phone,selectedCity,address,password
+                            ) {success->
+                                if(success){
+                                    navController.navigate("dashboard_seller"){
+                                        popUpTo(0)
+                                    }
+                                }else{
+                                    errorMessage = "مشکلی پیش آمده است لطفا بعدا امتحان کنید"
+                                }
+                            }
                         } else {
                             errorMessage = "لطفاً تمامی فیلدها را به درستی پر کنید."
                         }
@@ -230,7 +243,7 @@ fun SellerRegisterScreen(navController: NavController) {
                 }
                 Spacer(modifier = Modifier.height(10.dp))
                 TextButton(onClick = {
-                    navController.navigate("seller_register")
+                    navController.navigate("seller_login")
                 }) {
                     Text(
                         "حساب کاربری دارید؟ ورود فروشنده",

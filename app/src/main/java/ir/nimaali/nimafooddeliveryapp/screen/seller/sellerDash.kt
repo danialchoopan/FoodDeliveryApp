@@ -17,7 +17,9 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.ExitToApp
+import androidx.compose.material.icons.filled.Face
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.Menu
@@ -38,6 +40,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
+import ir.nimaali.nimafooddeliveryapp.data.seller.SellerHomeRequestGroup
+import ir.nimaali.nimafooddeliveryapp.screen.functions.LoadingProgressbar
 import ir.nimaali.nimafooddeliveryapp.ui.theme.BackgroundColor
 import ir.nimaali.nimafooddeliveryapp.ui.theme.PrimaryColor
 import ir.nimaali.nimafooddeliveryapp.ui.theme.SurfaceColor
@@ -48,8 +52,25 @@ import kotlinx.coroutines.withContext
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SellerDashboardScreen(navController: NavHostController) {
+    val m_context = LocalContext.current
+
+    val userSharedPreferences =
+        m_context.getSharedPreferences("app_data", Context.MODE_PRIVATE)
+
+    val sellerHomeRequestGroup = SellerHomeRequestGroup(m_context)
+
+    var onGoingProgress by remember {
+        mutableStateOf(true)
+    }
+
     var isStoreOpen by remember { mutableStateOf(true) }
     var showBottomSheet by remember { mutableStateOf(false) }
+
+    sellerHomeRequestGroup.getSellerStatus {
+        isStoreOpen = it
+        onGoingProgress=false
+    }
+
 
     val orders = listOf(
         mapOf(
@@ -89,7 +110,7 @@ fun SellerDashboardScreen(navController: NavHostController) {
             colors = TopAppBarDefaults.topAppBarColors(containerColor = Color(0xFF4CAF50)),
             navigationIcon = {
                 IconButton(onClick = {
-                    showBottomSheet=true
+                    showBottomSheet = true
                 }) {
                     Icon(
                         Icons.Default.AddCircle,
@@ -122,158 +143,184 @@ fun SellerDashboardScreen(navController: NavHostController) {
                         .padding(16.dp)
                         .fillMaxWidth()
                 ) {
-                    MenuItem(icon = Icons.Default.AddCircle, title = "لیست غذاها", onClick = {
-                        navController.navigate("/seller/list/food")
+                    MenuItem(icon = Icons.Default.Menu, title = "لیست غذاها", onClick = {
+                        navController.navigate("seller/list/food")
                         showBottomSheet = false
                     })
                     MenuItem(icon = Icons.Default.AddCircle, title = "افزودن غذا", onClick = {
-                        navController.navigate("/seller/add/food")
+                        navController.navigate("seller/add/food")
                         showBottomSheet = false
                     })
-                    MenuItem(icon = Icons.Default.AddCircle, title = "تاریخچه سفارش", onClick = {
-                        navController.navigate("/seller/order/history")
+                    MenuItem(icon = Icons.Default.DateRange, title = "تاریخچه سفارش", onClick = {
+                        navController.navigate("seller/order/history")
                         showBottomSheet = false
                     })
-                    MenuItem(icon = Icons.Default.AddCircle, title = "درآمد", onClick = {
-                        navController.navigate("/seller/payment")
+                    MenuItem(icon = Icons.Default.Face, title = "درآمد", onClick = {
+                        navController.navigate("seller/payment")
                         showBottomSheet = false
                     })
+                    MenuItem(
+                        icon = Icons.Default.ExitToApp,
+                        title = "خروج از حساب کاربری",
+                        onClick = {
+                            showBottomSheet = false
+                            userSharedPreferences.edit().let {
+                                it.clear()
+                                it.apply()
+                            }
+                            navController.navigate("seller_login") {
+                                popUpTo(0)
+                            }
+                        })
                 }
             }
         }
+        if (onGoingProgress) {
 
-        Column(
-            modifier = Modifier
-                .padding(innerPadding)
-                .fillMaxSize()
-        ) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(
-                        imageVector = if (isStoreOpen) Icons.Default.CheckCircle else Icons.Default.Close,
-                        contentDescription = null,
-                        tint = if (isStoreOpen) Color.Green else Color.Red
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(
-                        "وضعیت فروشگاه: ${if (isStoreOpen) "باز" else "بسته"}",
-                        color = if (isStoreOpen) Color(0xFF013220) else Color.Red,
-                        style = MaterialTheme.typography.titleMedium,
-                        fontFamily = vazirFontFamily
-                    )
-                }
-                Button(
-                    onClick = { isStoreOpen = !isStoreOpen },
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = if (isStoreOpen) Color.Red else Color(0xFF013220)
-                    )
-                ) {
-                    Text(
-                        if (isStoreOpen) "بستن فروشگاه" else "باز کردن فروشگاه",
-                        fontFamily = vazirFontFamily,
-                        style = MaterialTheme.typography.titleMedium
-                    )
-                }
+            LoadingProgressbar {
+
             }
 
-            if (orders.isEmpty()) {
-                Box(
-                    modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center
+        } else {
+            Column(
+                modifier = Modifier
+                    .padding(innerPadding)
+                    .fillMaxSize()
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(
-                        "هیچ سفارشی موجود نیست",
-                        style = MaterialTheme.typography.titleLarge,
-                        fontFamily = vazirFontFamily
-                    )
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            imageVector = if (isStoreOpen) Icons.Default.CheckCircle else Icons.Default.Close,
+                            contentDescription = null,
+                            tint = if (isStoreOpen) Color.Green else Color.Red
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            "وضعیت فروشگاه: ${if (isStoreOpen) "باز" else "بسته"}",
+                            color = if (isStoreOpen) Color(0xFF013220) else Color.Red,
+                            style = MaterialTheme.typography.titleMedium,
+                            fontFamily = vazirFontFamily
+                        )
+                    }
+                    Button(
+                        onClick = {
+                            onGoingProgress=true
+                            isStoreOpen = !isStoreOpen
+                            sellerHomeRequestGroup.setSellerStatus(isStoreOpen) {
+                                onGoingProgress=false
+                            }
+                        },
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = if (isStoreOpen) Color.Red else Color(0xFF013220)
+                        )
+                    ) {
+                        Text(
+                            if (isStoreOpen) "بستن فروشگاه" else "باز کردن فروشگاه",
+                            fontFamily = vazirFontFamily,
+                            style = MaterialTheme.typography.titleMedium
+                        )
+                    }
                 }
-            } else {
-                LazyColumn(modifier = Modifier.fillMaxSize()) {
-                    items(orders) { order ->
-                        val customerName = order["customerName"] as String
-                        val orderStatus = order["orderStatus"] as String
-                        val address = order["address"] as String
-                        val orderTime = order["orderTime"] as String
-                        val foods = order["foods"] as List<Map<String, Any>>
-                        val isApproved = order["isApproved"] as Boolean
 
-                        Card(
-                            modifier = Modifier
-                                .padding(8.dp)
-                                .fillMaxWidth(),
-                            elevation = CardDefaults.cardElevation(4.dp)
-                        ) {
-                            Column(modifier = Modifier.padding(16.dp)) {
-                                Text(
-                                    "نام سفارش‌دهنده: $customerName",
-                                    style = MaterialTheme.typography.bodyLarge,
-                                    fontFamily = vazirFontFamily
-                                )
-                                Spacer(modifier = Modifier.height(8.dp))
-                                Text(
-                                    "وضعیت سفارش: $orderStatus",
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    color = if (isApproved) Color(0xFF013220) else Color.Red
-                                )
-                                Spacer(modifier = Modifier.height(8.dp))
-                                Text(
-                                    "آدرس: $address",
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    fontFamily = vazirFontFamily
-                                )
-                                Spacer(modifier = Modifier.height(8.dp))
-                                Text(
-                                    "زمان سفارش: $orderTime",
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    fontFamily = vazirFontFamily
-                                )
-                                Spacer(modifier = Modifier.height(8.dp))
-                                Text(
-                                    "لیست غذاها:",
-                                    style = MaterialTheme.typography.bodyLarge,
-                                    fontFamily = vazirFontFamily
-                                )
-                                foods.forEach { food ->
-                                    val foodName = food["name"] as String
-                                    val quantity = food["quantity"] as Int
+                if (orders.isEmpty()) {
+                    Box(
+                        modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            "هیچ سفارشی موجود نیست",
+                            style = MaterialTheme.typography.titleLarge,
+                            fontFamily = vazirFontFamily
+                        )
+                    }
+                } else {
+                    LazyColumn(modifier = Modifier.fillMaxSize()) {
+                        items(orders) { order ->
+                            val customerName = order["customerName"] as String
+                            val orderStatus = order["orderStatus"] as String
+                            val address = order["address"] as String
+                            val orderTime = order["orderTime"] as String
+                            val foods = order["foods"] as List<Map<String, Any>>
+                            val isApproved = order["isApproved"] as Boolean
+
+                            Card(
+                                modifier = Modifier
+                                    .padding(8.dp)
+                                    .fillMaxWidth(),
+                                elevation = CardDefaults.cardElevation(4.dp)
+                            ) {
+                                Column(modifier = Modifier.padding(16.dp)) {
                                     Text(
-                                        "$foodName - $quantity عدد",
+                                        "نام سفارش‌دهنده: $customerName",
+                                        style = MaterialTheme.typography.bodyLarge,
+                                        fontFamily = vazirFontFamily
+                                    )
+                                    Spacer(modifier = Modifier.height(8.dp))
+                                    Text(
+                                        "وضعیت سفارش: $orderStatus",
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        color = if (isApproved) Color(0xFF013220) else Color.Red
+                                    )
+                                    Spacer(modifier = Modifier.height(8.dp))
+                                    Text(
+                                        "آدرس: $address",
                                         style = MaterialTheme.typography.bodyMedium,
                                         fontFamily = vazirFontFamily
                                     )
-                                }
-                                Spacer(modifier = Modifier.height(8.dp))
-                                Row(
-                                    horizontalArrangement = Arrangement.Center,
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    modifier = Modifier.fillMaxSize()
-                                ) {
-                                    if (!isApproved) {
+                                    Spacer(modifier = Modifier.height(8.dp))
+                                    Text(
+                                        "زمان سفارش: $orderTime",
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        fontFamily = vazirFontFamily
+                                    )
+                                    Spacer(modifier = Modifier.height(8.dp))
+                                    Text(
+                                        "لیست غذاها:",
+                                        style = MaterialTheme.typography.bodyLarge,
+                                        fontFamily = vazirFontFamily
+                                    )
+                                    foods.forEach { food ->
+                                        val foodName = food["name"] as String
+                                        val quantity = food["quantity"] as Int
+                                        Text(
+                                            "$foodName - $quantity عدد",
+                                            style = MaterialTheme.typography.bodyMedium,
+                                            fontFamily = vazirFontFamily
+                                        )
+                                    }
+                                    Spacer(modifier = Modifier.height(8.dp))
+                                    Row(
+                                        horizontalArrangement = Arrangement.Center,
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        modifier = Modifier.fillMaxSize()
+                                    ) {
+                                        if (!isApproved) {
+                                            Button(
+                                                onClick = { /* تایید سفارش */ },
+                                                colors = ButtonDefaults.buttonColors(
+                                                    containerColor = Color(0xFF013220)
+                                                )
+                                            ) {
+                                                Text(
+                                                    "تایید سفارش", fontFamily = vazirFontFamily
+                                                )
+                                            }
+
+                                            Spacer(modifier = Modifier.width(16.dp))
+                                        }
                                         Button(
-                                            onClick = { /* تایید سفارش */ },
-                                            colors = ButtonDefaults.buttonColors(
-                                                containerColor = Color(0xFF013220)
-                                            )
+                                            onClick = { /* مشاهده جزئیات */ },
+                                            colors = ButtonDefaults.buttonColors(containerColor = Color.Blue)
                                         ) {
                                             Text(
-                                                "تایید سفارش", fontFamily = vazirFontFamily
+                                                "جزئیات سفارش", fontFamily = vazirFontFamily
                                             )
                                         }
-
-                                        Spacer(modifier = Modifier.width(16.dp))
-                                    }
-                                    Button(
-                                        onClick = { /* مشاهده جزئیات */ },
-                                        colors = ButtonDefaults.buttonColors(containerColor = Color.Blue)
-                                    ) {
-                                        Text(
-                                            "جزئیات سفارش", fontFamily = vazirFontFamily
-                                        )
                                     }
                                 }
                             }
@@ -281,6 +328,7 @@ fun SellerDashboardScreen(navController: NavHostController) {
                     }
                 }
             }
+
         }
 
     }

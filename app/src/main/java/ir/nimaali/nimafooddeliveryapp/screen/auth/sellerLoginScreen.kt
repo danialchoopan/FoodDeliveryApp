@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -66,7 +67,7 @@ fun SellerLoginScreen(navController: NavController) {
                         navController.popBackStack()
                     }) {
                         Icon(
-                            imageVector = Icons.Default.ArrowBack, // آیکون بازگشت پیش‌فرض
+                            imageVector = Icons.Default.Close, // آیکون بازگشت پیش‌فرض
                             contentDescription = "بازگشت",
                             tint = Color.White
                         )
@@ -134,7 +135,7 @@ fun SellerLoginScreen(navController: NavController) {
                                 password
                             ) {success->
                                 if(success){
-                                    navController.navigate("home_user"){
+                                    navController.navigate("dashboard_seller"){
                                         popUpTo(0)
                                     }
                                 }else{

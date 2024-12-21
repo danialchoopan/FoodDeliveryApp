@@ -56,6 +56,7 @@ dependencies {
     // Add ViewModel
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.6.2")
 
+
     // Volley
     implementation("com.android.volley:volley:1.2.1")
 
@@ -63,6 +64,8 @@ dependencies {
     implementation("com.google.code.gson:gson:2.10.1")
 
     //coil
-    implementation("io.coil-kt.coil3:coil-compose:3.0.4")
+    implementation("io.coil-kt:coil-compose:2.2.0")
 
+    //Glide
+    implementation("com.github.bumptech.glide:compose:1.0.0-alpha.1")
 }

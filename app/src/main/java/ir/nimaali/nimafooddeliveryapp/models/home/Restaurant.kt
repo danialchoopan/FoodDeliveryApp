@@ -13,5 +13,7 @@ data class Restaurant(
     @SerializedName("name")
     val name: String,
     @SerializedName("open")
-    val open: Boolean
+    val open: Boolean,
+    @SerializedName("id")
+    val id: Int
 )

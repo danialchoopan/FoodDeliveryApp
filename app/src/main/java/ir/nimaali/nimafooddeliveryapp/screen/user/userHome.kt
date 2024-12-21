@@ -9,6 +9,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
@@ -23,7 +24,9 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -32,10 +35,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
+import com.bumptech.glide.integration.compose.GlideImage
 import ir.nimaali.nimafooddeliveryapp.data.home.HomeRestaurantOderRequestGroup
 import ir.nimaali.nimafooddeliveryapp.data.user.UserAuthRequestGroup
 import ir.nimaali.nimafooddeliveryapp.models.home.Restaurant
 import ir.nimaali.nimafooddeliveryapp.screen.functions.LoadingProgressbar
+import ir.nimaali.nimafooddeliveryapp.screen.user.food.LoadImageFormURLFixutils
 import ir.nimaali.nimafooddeliveryapp.ui.theme.BackgroundColor
 import ir.nimaali.nimafooddeliveryapp.ui.theme.PrimaryColor
 import ir.nimaali.nimafooddeliveryapp.ui.theme.SurfaceColor
@@ -87,7 +93,7 @@ fun UserHomeScreen(navController: NavController) {
     ) { innerPadding ->
         Box(modifier = Modifier.padding(innerPadding)) {
             when (selectedIndex) {
-                0 -> RestaurantsScreen() // Ensure no Scaffold is used inside these screens
+                0 -> RestaurantsScreen(navController) // Ensure no Scaffold is used inside these screens
                 1 -> OrdersScreen()
                 2 -> ProfileScreen(navController)
             }
@@ -96,9 +102,9 @@ fun UserHomeScreen(navController: NavController) {
 
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalGlideComposeApi::class)
 @Composable
-fun RestaurantsScreen() {
+fun RestaurantsScreen(navController: NavController) {
 
     var errorMessage by remember { mutableStateOf("") }
     var listRestaurant by remember {
@@ -118,7 +124,7 @@ fun RestaurantsScreen() {
 
     homePageRestaurantRequest.homePageRestaurant { success, homePageRestaurant ->
         if (success) {
-            loading=false
+            loading = false
             listRestaurant = homePageRestaurant.restaurants
         }
     }
@@ -138,16 +144,18 @@ fun RestaurantsScreen() {
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = Color(0xFF4CAF50)),
             )
         }
-    ) { innerPadding ->
+    ) { _ ->
+
         if (loading) {
             LoadingProgressbar {
 
             }
-        }else {
-            if (errorMessage.isNotEmpty() or listRestaurant.isNotEmpty()) {
+        } else {
+            if (listRestaurant.isEmpty()) {
                 Column(
                     verticalArrangement = Arrangement.Center,
-                    horizontalAlignment = Alignment.CenterHorizontally
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier.fillMaxSize()
                 ) {
                     if (errorMessage.isNotEmpty()) {
                         Text(errorMessage, color = MaterialTheme.colorScheme.error)
@@ -163,54 +171,77 @@ fun RestaurantsScreen() {
             } else {
                 LazyColumn(
                     modifier = Modifier
-                        .padding(innerPadding)
+                        .fillMaxSize()
                         .padding(16.dp)
                 ) {
+                    item {
+                        Spacer(modifier = Modifier.fillMaxWidth().height(70.dp))
+                    }
                     items(listRestaurant) { restaurant ->
                         Card(
                             modifier = Modifier
-                                .padding(vertical = 8.dp)
-                                .fillMaxWidth(),
-                            elevation = CardDefaults.cardElevation(4.dp)
+                                .padding(8.dp)
+                                .clickable {
+                                    navController.navigate("home/restaurant/${restaurant.id}")
+                                },
+                            colors = CardDefaults.cardColors(containerColor = Color.White),
+                            elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
                         ) {
+                            Column {
+                                // Restaurant Image
 
-                            ListItem(
-                                headlineContent = {
+                                GlideImage(
+                                    model = "https://abzarwp.com/static/uploads/2019/01/wordpress-bg-medblue.png",
+                                    contentDescription = "",
+                                    contentScale = ContentScale.Crop,
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .height(150.dp),
+                                )
+
+                                // Restaurant Details
+                                Column(
+                                    modifier = Modifier.padding(8.dp)
+                                ) {
                                     Text(
                                         text = restaurant.name,
-                                        style = MaterialTheme.typography.bodyLarge
+                                        style = MaterialTheme.typography.titleMedium,
+                                        modifier = Modifier.padding(bottom = 4.dp)
                                     )
-                                },
-                                supportingContent = {
                                     Text(
                                         text = restaurant.category,
                                         style = MaterialTheme.typography.bodyMedium,
                                         fontFamily = vazirFontFamily
                                     )
-                                },
-                                leadingContent = {
-                                    Icon(
-                                        imageVector = if (restaurant.open) Icons.Default.CheckCircle else Icons.Default.Close,
-                                        contentDescription = null,
-                                        tint = if (restaurant.open) Color.Green else Color.Red
-                                    )
-                                },
-                                trailingContent = {
-                                    Text(
-                                        text = if (restaurant.open) "باز است" else "بسته است",
-                                        color = if (restaurant.open) Color.Green else Color.Red,
-                                        style = MaterialTheme.typography.bodyMedium,
-                                        fontFamily = vazirFontFamily
-                                    )
-                                },
-                                modifier = Modifier.padding(8.dp)
-                            )
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.End,
+                                        modifier = Modifier
+                                            .fillMaxWidth() // Ensures the Row takes up the full width of the parent
+                                            .padding(top = 8.dp)
+                                    ) {
+                                        Icon(
+                                            imageVector = if (restaurant.open) Icons.Default.CheckCircle else Icons.Default.Close,
+                                            contentDescription = null,
+                                            tint = if (restaurant.open) Color.Green else Color.Red
+                                        )
+                                        Spacer(modifier = Modifier.width(8.dp))
+                                        Text(
+                                            text = if (restaurant.open) "باز است" else "بسته است",
+                                            color = if (restaurant.open) Color.DarkGray else Color.Red,
+                                            style = MaterialTheme.typography.bodyMedium,
+                                            fontFamily = vazirFontFamily
+                                        )
+                                    }
 
-
+                                }
+                            }
                         }
+
                     }
                 }
             }
+
         }
     }
 }
