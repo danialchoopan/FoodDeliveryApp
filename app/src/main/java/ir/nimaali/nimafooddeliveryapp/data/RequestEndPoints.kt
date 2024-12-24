@@ -12,6 +12,9 @@ object RequestEndPoints {
     val userEditPassword = "$rootDomainApi/user/edit/password"
     val userEditCityName = "$rootDomainApi/user/edit/city"
 
+    val showUserOrderData="$rootDomainApi/user/orders/total"
+
+
     //user auth requests
     val sellerRegister = "$rootDomainApi/seller/register"
     val sellerLogin = "$rootDomainApi/seller/login"
@@ -21,6 +24,18 @@ object RequestEndPoints {
 
     //user restaurants
     val userRestaurants = "$rootDomainApi/user/restaurants"
+    val userRestaurantsDetail = "$rootDomainApi/user/restaurant"
+
+    //order
+    val placeOrderUser="$rootDomainApi/add/order"
+    val usersOrdersShow="$rootDomainApi/user/orders"
+    val usersOrdersShowAll="$rootDomainApi/user/orders/all"
+    val usersOrderCancel="$rootDomainApi/user/orders/cancel"
+
+
+    val userAddCommentRestaurantsDetail = "$rootDomainApi/add/comment"
+    val userDeleteCommentRestaurantsDetail = "$rootDomainApi/comment/delete"
+
 
 
     //seller foods
@@ -31,6 +46,18 @@ object RequestEndPoints {
     val sellerOpenStatus = "$rootDomainApi/seller/open/status"
     val sellerOpen = "$rootDomainApi/seller/open"
 
+    //seller order
+    val sellerShowOrderDash="$rootDomainApi/seller/orders/not"
+    val sellerShowOrderDashAll="$rootDomainApi/seller/orders/all"
+
+    val sellerShowOrderById="$rootDomainApi/seller/orders/detail"
+
+    val sellerOrderPreparing="$rootDomainApi/seller/orders/preparing"
+    val sellerOrderCompleted="$rootDomainApi/seller/orders/completed"
+    val sellerOrderCancel="$rootDomainApi/seller/orders/cancel"
+
+
+    val sellerTotalOrder="$rootDomainApi/seller/orders/total"
 
 
 }

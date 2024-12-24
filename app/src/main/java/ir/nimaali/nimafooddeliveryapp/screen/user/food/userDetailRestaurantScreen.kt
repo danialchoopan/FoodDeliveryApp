@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.SharedPreferences
 import android.provider.CalendarContract.Colors
 import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -52,6 +53,8 @@ import ir.nimaali.nimafooddeliveryapp.data.RequestEndPoints
 import ir.nimaali.nimafooddeliveryapp.data.home.HomeRestaurantOderRequestGroup
 import ir.nimaali.nimafooddeliveryapp.data.user.UserAuthRequestGroup
 import ir.nimaali.nimafooddeliveryapp.models.home.Restaurant
+import ir.nimaali.nimafooddeliveryapp.models.home.detail.Comment
+import ir.nimaali.nimafooddeliveryapp.models.home.detail.Food
 import ir.nimaali.nimafooddeliveryapp.screen.functions.LoadingProgressbar
 import ir.nimaali.nimafooddeliveryapp.ui.theme.BackgroundColor
 import ir.nimaali.nimafooddeliveryapp.ui.theme.PrimaryColor
@@ -61,60 +64,41 @@ import ir.nimaali.nimafooddeliveryapp.viewmodel.AuthUserSellerViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
-
-fun LoadImageFormURLFixutils(img: String): String {
-//    return RequestEndPoints.storageImageLoadFood + img.replace(
-//        "\\",
-//        "/"
-//    )
-    return img.replace(
-        "\\",
-        "/"
-    )
-}
-
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalGlideComposeApi::class)
 @Composable
 fun UserDetailRestaurantScreen(navController: NavController, restaurant_id: String) {
 
-    val m_context= LocalContext.current
+    val m_context = LocalContext.current
     val rememberScroll = rememberScrollState()
     // داده‌های نمونه
-    val restaurantName = "رستوران نمونه"
-    val restaurantCategory = "ایرانی و سنتی"
+    var restaurantName = "رستوران نمونه"
+    var restaurantCategory = "ایرانی و سنتی"
+    var restaurantAddress = "ادرس"
+
+    var orderDetails by remember { mutableStateOf<List<Pair<Int, Int>>>(emptyList()) }
+
 
     var loading by remember {
-        mutableStateOf(false)
+        mutableStateOf(true)
     }
+    var showDialog by remember { mutableStateOf(false) }
 
-
-//    val restaurantImage = painterResource(id = R.drawable.restaurant_image) // تصویر نمونه
-    val dishes = listOf(
-        Dish("قرمه سبزی", "توضیحات خوشمزه", 45000),
-        Dish("زرشک پلو", "بهترین کیفیت", 60000),
-        Dish("کباب کوبیده", "با دو سیخ", 70000)
-    )
-    val comments = listOf(
-        "غذا عالی بود!",
-        "بسیار تمیز و مرتب.",
-        "سرویس‌دهی کمی کند بود ولی کیفیت خوب بود."
-    )
-
-    // مقادیر تعداد انتخاب‌شده برای هر غذا
-    val quantities = remember { mutableStateListOf(*Array(dishes.size) { 0 }) }
-
-
-    LaunchedEffect(Unit) {
-
-
+    var listComment by remember {
+        mutableStateOf(emptyList<Comment>())
     }
+    var listFoods by remember {
+        mutableStateOf(emptyList<Food>())
+    }
+    val quantities = remember { mutableStateListOf<Int>() }
+
+    val homeRestaurantOderRequestGroup = HomeRestaurantOderRequestGroup(m_context)
 
     Scaffold(
         topBar = {
             TopAppBar(
                 title = {
                     Text(
-                        "نمایش رستوران ", style = MaterialTheme.typography.headlineSmall,
+                        "$restaurantName رستوران ", style = MaterialTheme.typography.headlineSmall,
                         fontFamily = vazirFontFamily,
                         modifier = Modifier.fillMaxWidth(),
                         textAlign = TextAlign.Center,
@@ -124,11 +108,10 @@ fun UserDetailRestaurantScreen(navController: NavController, restaurant_id: Stri
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = Color(0xFF4CAF50)),
                 navigationIcon = {
                     IconButton(onClick = {
-                        // عملکرد بازگشت
                         navController.popBackStack()
                     }) {
                         Icon(
-                            imageVector = Icons.Default.Close, // آیکون بازگشت پیش‌فرض
+                            imageVector = Icons.Default.Close,
                             contentDescription = "بازگشت",
                             tint = Color.White
                         )
@@ -138,32 +121,41 @@ fun UserDetailRestaurantScreen(navController: NavController, restaurant_id: Stri
         },
         modifier = Modifier.fillMaxSize(),
         content = { padding ->
-//            LoadImageOnline(
-//                model = "http://192.168.1.11:5000/static/images/restaurants/1.jpg",
-//                modifier = Modifier.size(400.dp, 200.dp)
-//            )
+
+            homeRestaurantOderRequestGroup.homePageRestaurantDetailById(restaurant_id) { name, foods, comments, category, address ->
+                restaurantName = name
+                restaurantCategory = category
+                restaurantAddress = address
+
+                if (!foods.isNullOrEmpty()) {
+                    listFoods = foods
+                    quantities.clear() // پاک کردن مقادیر قبلی
+                    quantities.addAll(List(foods.size) { 0 }) // مقداردهی اولیه به تعداد غذاها
+                }
+
+                if (!comments.isNullOrEmpty())
+                    listComment = comments
+
+                loading = false
+            }
+
             Column(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(padding)
                     .verticalScroll(rememberScroll)
             ) {
-                Card {
-                    GlideImage(
-                        model = "https://abzarwp.com/static/uploads/2019/01/wordpress-bg-medblue.png",
-                        contentDescription = "",
-                        contentScale = ContentScale.Crop,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(230.dp),
-                    )
-                }
-
                 if (loading) {
-                    LoadingProgressbar {
-
-                    }
+                    LoadingProgressbar {}
                 } else {
+//                    GlideImage(
+//                        model = RequestEndPoints.rootDomain + "/" + restaurant.image,
+//                        contentDescription = "",
+//                        contentScale = ContentScale.Crop,
+//                        modifier = Modifier
+//                            .fillMaxWidth()
+//                            .height(150.dp),
+//                    )
                     // اطلاعات رستوران
                     Column(modifier = Modifier.padding(16.dp)) {
                         Text(
@@ -178,6 +170,12 @@ fun UserDetailRestaurantScreen(navController: NavController, restaurant_id: Stri
                             style = MaterialTheme.typography.bodyMedium,
                             color = Color.Gray
                         )
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            text = restaurantAddress,
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = Color.Gray
+                        )
                     }
 
                     Spacer(modifier = Modifier.height(16.dp))
@@ -189,31 +187,88 @@ fun UserDetailRestaurantScreen(navController: NavController, restaurant_id: Stri
                         modifier = Modifier.padding(horizontal = 16.dp),
                         fontFamily = vazirFontFamily
                     )
-                    LazyColumn(
-                        modifier = Modifier
-                            .height(400.dp)
-                            .padding(horizontal = 16.dp),
-                        verticalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        itemsIndexed(dishes) { index, dish ->
-                            DishItem(dish = dish, quantity = quantities[index]) { change ->
-                                quantities[index] = (quantities[index] + change).coerceAtLeast(0)
+
+                    if (listFoods.isNotEmpty()) {
+                        LazyColumn(
+                            modifier = Modifier
+                                .height(400.dp)
+                                .padding(horizontal = 16.dp),
+                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            itemsIndexed(listFoods) { index, food ->
+                                DishItem(
+                                    food = food,
+                                    index = index,
+                                    quantities = quantities,
+                                    onQuantityChange = { i, change ->
+                                        // بروزرسانی تعداد غذا
+                                        if (i < quantities.size) {
+                                            quantities[i] =
+                                                (quantities[i] + change).coerceAtLeast(0)
+                                        }
+                                        // لاگ کردن تغییرات
+                                        Log.d(
+                                            "QuantityChanged",
+                                            "Food: ${food.foodName}, Quantity: ${quantities[i]}"
+                                        )
+                                    }
+                                )
                             }
                         }
+                    } else {
+                        Text("این رستوران در حال حاضر غذایی ثبت نکرده است!")
                     }
 
                     Spacer(modifier = Modifier.height(6.dp))
+
                     Button(
                         onClick = {
 
+
+                            orderDetails = listFoods.mapIndexed { index, food ->
+                                Pair(food.foodId, quantities.getOrElse(index) { 0 })
+                            }.filter { it.second > 0 }
+
+
+                            if (orderDetails.isEmpty()) {
+                                Toast.makeText(
+                                    m_context,
+                                    "لطفا برای ثبت سفارش ابتدا تعداد عذا ها را ثبت کنید",
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                            } else {
+                                showDialog = true
+                            }
                         },
-                        modifier = Modifier.fillMaxWidth().padding(16.dp)
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp)
                     ) {
                         Text(
                             "ثبت سفارش",
                             fontFamily = vazirFontFamily,
                             style = MaterialTheme.typography.headlineSmall
                         )
+                    }
+
+                    if (orderDetails.isNotEmpty()) {
+                        if (showDialog) {
+                            ConfirmOrderDialog({
+                                restaurantName=orderDetails.toString()
+                                homeRestaurantOderRequestGroup.placeOrder(restaurant_id,orderDetails.toString()){
+                                    navController.navigate("home_user") {
+                                        popUpTo(0)
+                                    }
+                                }
+                            }, {
+                                showDialog = false
+                                Toast.makeText(
+                                    m_context,
+                                    "تایید سفارش لغو شد",
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                            })
+                        }
                     }
 
                     Spacer(modifier = Modifier.height(16.dp))
@@ -225,33 +280,43 @@ fun UserDetailRestaurantScreen(navController: NavController, restaurant_id: Stri
                         modifier = Modifier.padding(horizontal = 16.dp),
                         fontFamily = vazirFontFamily
                     )
-                    LazyColumn(
-                        modifier = Modifier
-                            .height(300.dp)
-                            .padding(16.dp),
-                        verticalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        items(comments) { comment ->
-                            Text(
-                                text = comment,
-                                style = MaterialTheme.typography.bodyLarge,
-                                color = Color.Gray,
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .background(Color(0xFFF5F5F5), RoundedCornerShape(8.dp))
-                                    .padding(8.dp)
-                            )
-                        }
-                    }
 
+                    if (listComment.isNotEmpty()) {
+                        LazyColumn(
+                            modifier = Modifier
+                                .height(300.dp)
+                                .padding(16.dp),
+                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            items(listComment) {
+                                Text(
+                                    text = it.commentContent,
+                                    style = MaterialTheme.typography.bodyLarge,
+                                    color = Color.Gray,
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .background(Color(0xFFF5F5F5), RoundedCornerShape(8.dp))
+                                        .padding(16.dp)
+                                )
+                            }
+                        }
+                    } else {
+                        Text(
+                            "در حال نظری برای این رستوران وجود ندارد",
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp)
+                        )
+                    }
                 }
             }
         }
     )
 }
 
+@OptIn(ExperimentalGlideComposeApi::class)
 @Composable
-fun DishItem(dish: Dish, quantity: Int, onQuantityChange: (Int) -> Unit) {
+fun DishItem(food: Food, index: Int, quantities: List<Int>, onQuantityChange: (Int, Int) -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -260,26 +325,30 @@ fun DishItem(dish: Dish, quantity: Int, onQuantityChange: (Int) -> Unit) {
         verticalAlignment = Alignment.CenterVertically
     ) {
         // تصویر غذا
-//        Image(
-//            painter = painterResource(id = dish.imageRes),
-//            contentDescription = "تصویر ${dish.name}",
-//            modifier = Modifier
-//                .size(64.dp)
-//                .clip(RoundedCornerShape(8.dp)),
-//            contentScale = ContentScale.Crop
-//        )
+        GlideImage(
+            model = RequestEndPoints.rootDomain + "/" + food.foodImage,
+            contentDescription = "",
+            modifier = Modifier
+                .size(64.dp)
+                .clip(RoundedCornerShape(8.dp)),
+            contentScale = ContentScale.Crop
+        )
         Spacer(modifier = Modifier.width(8.dp))
 
         // اطلاعات غذا
         Column(modifier = Modifier.weight(1f)) {
-            Text(text = dish.name, style = MaterialTheme.typography.bodyLarge, color = Color.Black)
             Text(
-                text = dish.description,
+                text = food.foodName,
+                style = MaterialTheme.typography.bodyLarge,
+                color = Color.Black
+            )
+            Text(
+                text = food.foodDescription,
                 style = MaterialTheme.typography.bodySmall,
                 color = Color.Gray
             )
             Text(
-                text = "${dish.price} تومان",
+                text = "${food.foodPrice} تومان",
                 style = MaterialTheme.typography.bodyMedium,
                 color = Color(0xFF4CAF50)
             )
@@ -287,39 +356,53 @@ fun DishItem(dish: Dish, quantity: Int, onQuantityChange: (Int) -> Unit) {
 
         // کنترل تعداد
         Row(verticalAlignment = Alignment.CenterVertically) {
-            IconButton(onClick = { onQuantityChange(-1) }) {
+            IconButton(onClick = { onQuantityChange(index, -1) }) {
                 Icon(Icons.Default.Clear, contentDescription = "کاهش تعداد", tint = Color.Red)
             }
             Text(
-                text = "$quantity",
+                text = quantities.getOrElse(index) { 0 }.toString(), // تعداد غذا از آرایه
                 style = MaterialTheme.typography.bodyLarge,
                 color = Color.Black
             )
-            IconButton(onClick = { onQuantityChange(1) }) {
+            IconButton(onClick = { onQuantityChange(index, 1) }) {
                 Icon(Icons.Default.Add, contentDescription = "افزایش تعداد", tint = Color.Green)
             }
         }
     }
 }
 
-// کلاس داده برای غذا
-data class Dish(
-    val name: String,
-    val description: String,
-    val price: Int,
-//    val imageRes: Int
-)
-//@Composable
-//fun LoadImageOnline(
-//    model: String,
-//    modifier: Modifier = Modifier
-//) {
-//    SubcomposeAsyncImage(
-//        modifier = modifier,
-//        model = model,
-//        loading = {
-//            CircularProgressIndicator(modifier = Modifier.requiredSize(40.dp))
-//        },
-//        contentDescription = null,
-//    )
-//}
+@Composable
+fun ConfirmOrderDialog(
+    onConfirm: () -> Unit,
+    onCancel: () -> Unit,
+) {
+    AlertDialog(
+        onDismissRequest = { onCancel() },
+        title = {
+            Text(text = "تایید سفارش")
+        },
+        text = {
+            Text(text = "آیا برای ثبت سفارش مطمئن هستید؟")
+        },
+        confirmButton = {
+            Button(
+                onClick = {
+                    onConfirm() // وقتی کاربر تایید کرد
+                }
+            ) {
+                Text("تایید")
+            }
+            Spacer(Modifier.width(20.dp))
+        },
+        dismissButton = {
+            Button(
+                onClick = {
+                    onCancel() // وقتی کاربر لغو کرد
+                }
+            ) {
+                Text("لغو")
+            }
+        }
+    )
+
+}

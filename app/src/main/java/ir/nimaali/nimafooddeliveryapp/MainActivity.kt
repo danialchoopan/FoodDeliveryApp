@@ -28,6 +28,9 @@ import ir.nimaali.nimafooddeliveryapp.screen.user.edit.EditUserScreen
 import ir.nimaali.nimafooddeliveryapp.screen.user.UserHomeScreen
 import ir.nimaali.nimafooddeliveryapp.screen.user.edit.EditUserPasswordScreen
 import ir.nimaali.nimafooddeliveryapp.screen.user.food.UserDetailRestaurantScreen
+import ir.nimaali.nimafooddeliveryapp.screen.user.order.UserOrderDetailScreen
+import ir.nimaali.nimafooddeliveryapp.screen.user.order.UserOrdersAllScreen
+import ir.nimaali.nimafooddeliveryapp.screen.user.us.AboutUsScreen
 import ir.nimaali.nimafooddeliveryapp.ui.theme.NimaFoodDeliveryAppTheme
 
 class MainActivity : ComponentActivity() {
@@ -66,6 +69,9 @@ class MainActivity : ComponentActivity() {
                         composable("home_user") {
                             UserHomeScreen(navController)
                         }
+                        composable("user/orders/all") {
+                            UserOrdersAllScreen(navController)
+                        }
                         composable("home/user/edit") {
                             EditUserScreen(navController)
                         }
@@ -73,6 +79,15 @@ class MainActivity : ComponentActivity() {
                             EditUserPasswordScreen(navController)
                         }
 
+                        //user order
+                        composable("user/order/{order_id}") {navBackStackEntry->
+                            val order_id=navBackStackEntry.arguments!!.getString("order_id")
+                            UserOrderDetailScreen(navController,order_id.toString())
+                        }
+                        //home pages
+                        composable("home/about/us") {
+                            AboutUsScreen(navController)
+                        }
 
                         //restaurant
                         composable("home/restaurant/{restaurant_id}") {navBackStackEntry->
@@ -107,8 +122,9 @@ class MainActivity : ComponentActivity() {
                         composable("seller/order/history") {
                             SellerOrderHistoryScreen(navController)
                         }
-                        composable("seller/order/detail") {
-                            SellerOrderDetailScreen(navController,false)
+                        composable("seller/order/detail/{order_id}") {navBackStackEntry->
+                            val order_id=navBackStackEntry.arguments!!.getString("order_id")
+                            SellerOrderDetailScreen(navController, order_id.toString())
                         }
                         composable("seller/payment") {
                             SellerMonthlyIncomeScreen(navController)

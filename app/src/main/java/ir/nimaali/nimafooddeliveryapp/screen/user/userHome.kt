@@ -1,7 +1,9 @@
 package ir.nimaali.nimafooddeliveryapp.screen.user
 
 import android.content.Context
+import android.content.Intent
 import android.content.SharedPreferences
+import android.net.Uri
 import android.provider.CalendarContract.Colors
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -37,11 +39,12 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
+import ir.nimaali.nimafooddeliveryapp.data.RequestEndPoints
 import ir.nimaali.nimafooddeliveryapp.data.home.HomeRestaurantOderRequestGroup
 import ir.nimaali.nimafooddeliveryapp.data.user.UserAuthRequestGroup
 import ir.nimaali.nimafooddeliveryapp.models.home.Restaurant
+import ir.nimaali.nimafooddeliveryapp.models.home.order.OrderListUsersAllItem
 import ir.nimaali.nimafooddeliveryapp.screen.functions.LoadingProgressbar
-import ir.nimaali.nimafooddeliveryapp.screen.user.food.LoadImageFormURLFixutils
 import ir.nimaali.nimafooddeliveryapp.ui.theme.BackgroundColor
 import ir.nimaali.nimafooddeliveryapp.ui.theme.PrimaryColor
 import ir.nimaali.nimafooddeliveryapp.ui.theme.SurfaceColor
@@ -94,7 +97,7 @@ fun UserHomeScreen(navController: NavController) {
         Box(modifier = Modifier.padding(innerPadding)) {
             when (selectedIndex) {
                 0 -> RestaurantsScreen(navController) // Ensure no Scaffold is used inside these screens
-                1 -> OrdersScreen()
+                1 -> OrdersScreen(navController)
                 2 -> ProfileScreen(navController)
             }
         }
@@ -175,7 +178,11 @@ fun RestaurantsScreen(navController: NavController) {
                         .padding(16.dp)
                 ) {
                     item {
-                        Spacer(modifier = Modifier.fillMaxWidth().height(70.dp))
+                        Spacer(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(70.dp)
+                        )
                     }
                     items(listRestaurant) { restaurant ->
                         Card(
@@ -191,7 +198,7 @@ fun RestaurantsScreen(navController: NavController) {
                                 // Restaurant Image
 
                                 GlideImage(
-                                    model = "https://abzarwp.com/static/uploads/2019/01/wordpress-bg-medblue.png",
+                                    model = RequestEndPoints.rootDomain + "/" + restaurant.image,
                                     contentDescription = "",
                                     contentScale = ContentScale.Crop,
                                     modifier = Modifier
@@ -248,7 +255,22 @@ fun RestaurantsScreen(navController: NavController) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun OrdersScreen() {
+fun OrdersScreen(navController: NavController) {
+    val m_context = LocalContext.current
+    val homeRestaurantOderRequestGroup = HomeRestaurantOderRequestGroup(m_context)
+
+    var listOrders by remember {
+        mutableStateOf(emptyList<OrderListUsersAllItem>())
+    }
+
+    var loading by remember {
+        mutableStateOf(true)
+    }
+
+    homeRestaurantOderRequestGroup.getShowOrdersUser {
+        listOrders = it
+        loading = false
+    }
     Scaffold(
         topBar = {
             TopAppBar(
@@ -265,13 +287,78 @@ fun OrdersScreen() {
             )
         }
     ) { innerPadding ->
-        Box(
-            modifier = Modifier
-                .padding(innerPadding)
-                .fillMaxSize(),
-            contentAlignment = Alignment.Center
-        ) {
-            Text("صفحه سفارش‌ها", style = MaterialTheme.typography.bodyLarge)
+        if (loading) {
+            LoadingProgressbar {
+
+            }
+        } else {
+            if (listOrders.isEmpty()) {
+                Column(
+                    modifier = Modifier.fillMaxSize(),
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text("شما سفارش در حال انجام ندارید!")
+                }
+            }
+            Box(
+                modifier = Modifier
+                    .padding(innerPadding)
+                    .fillMaxSize(),
+                contentAlignment = Alignment.TopCenter
+            ) {
+                LazyColumn {
+                    items(listOrders) { order ->
+                        Card(
+                            modifier = Modifier
+                                .padding(8.dp)
+                                .fillMaxWidth(),
+                            elevation = CardDefaults.cardElevation(4.dp)
+                        ) {
+                            Column(modifier = Modifier.padding(16.dp)) {
+                                Text(
+                                    "وضعیت سفارش: ${order.status} ",
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = if (order.status == "تایید شده") Color.DarkGray else Color.Red
+                                )
+                                Spacer(modifier = Modifier.height(8.dp))
+                                Text(
+                                    " نام رستوران : " + order.seller_name,
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    fontFamily = vazirFontFamily
+                                )
+                                Spacer(modifier = Modifier.height(8.dp))
+                                Text(
+                                    "زمان سفارش: ${order.orderDate}",
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    fontFamily = vazirFontFamily
+                                )
+                                Spacer(modifier = Modifier.height(8.dp))
+                                Spacer(modifier = Modifier.height(8.dp))
+                                Row(
+                                    horizontalArrangement = Arrangement.Center,
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    modifier = Modifier.fillMaxSize()
+                                ) {
+                                    Button(
+                                        onClick = {
+                                            navController.navigate("user/order/" + order.id)
+                                        },
+                                        colors = ButtonDefaults.buttonColors(containerColor = Color.Blue)
+                                    ) {
+                                        Text(
+                                            "جزئیات سفارش", fontFamily = vazirFontFamily
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                }
+
+            }
+
         }
     }
 }
@@ -279,22 +366,34 @@ fun OrdersScreen() {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProfileScreen(
-    navController: NavController
+    navController: NavController,
 ) {
     val authUserSellerViewModel: AuthUserSellerViewModel = viewModel()
     val m_context = LocalContext.current
     var onGoingProgress by remember {
         mutableStateOf(true)
     }
-//
-//    if (onGoingProgress) {
-//        DialogBoxLoading()
-//    }
 
     val userSharedPreferences =
         m_context.getSharedPreferences("app_data", Context.MODE_PRIVATE)
     val userData = authUserSellerViewModel.getUserLoginData(m_context)
 
+    val homeRestaurantOderRequestGroup=HomeRestaurantOderRequestGroup(m_context)
+    var userTotal by remember {
+        mutableStateOf("")
+    }
+    var userSuccessOrder by remember {
+        mutableStateOf("")
+    }
+    var userFailedOrder by remember {
+        mutableStateOf("")
+    }
+    homeRestaurantOderRequestGroup.getUserOrderData { success, failed, totalOrder ->
+        userTotal=totalOrder
+        userSuccessOrder=success
+        userFailedOrder=failed
+
+    }
     Scaffold(
         topBar = {
             TopAppBar(
@@ -370,13 +469,13 @@ fun ProfileScreen(
                             )
                         }
                     }
+
                     Row(
                         Modifier
                             .fillMaxWidth(),
                         horizontalArrangement = Arrangement.Center,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-
                         OutlinedButton(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -393,6 +492,96 @@ fun ProfileScreen(
                         }
                     }
                 }
+
+                // نمایش اطلاعات مربوط به سفارش‌ها
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(10.dp)
+                        .border(1.dp, Color.Gray)
+                        .background(Color.White)
+                ) {
+                    Spacer(modifier = Modifier.fillMaxWidth().height(8.dp))
+                    // نمایش مجموع قیمت سفارش‌ها
+                    Text(
+                        text = "مجموع قیمت سفارش‌ها: " + userTotal + " تومان ",
+                        fontSize = 16.sp,
+                        fontFamily = vazirFontFamily,
+                        modifier = Modifier.padding(10.dp)
+                    )
+
+                    // نمایش تعداد سفارش‌های موفق
+                    Text(
+                        text = "تعداد سفارش‌های موفق: "+ userSuccessOrder,
+                        fontSize = 16.sp,
+                        fontFamily = vazirFontFamily,
+                        modifier = Modifier.padding(10.dp)
+                    )
+
+                    // نمایش تعداد سفارش‌های لغو شده
+                    Text(
+                        text = "تعداد سفارش‌های لغو شده: "+ userFailedOrder,
+                        fontSize = 16.sp,
+                        fontFamily = vazirFontFamily,
+                        modifier = Modifier.padding(10.dp)
+                    )
+
+                    Spacer(modifier = Modifier.fillMaxWidth().height(16.dp))
+
+                    OutlinedButton(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(10.dp),
+                        onClick = {
+                            navController.navigate("user/orders/all")
+                        }
+                    ) {
+                        Text(
+                            text = "تاریخچه سفارش های کاربر",
+                            fontSize = 18.sp,
+                            fontFamily = vazirFontFamily
+                        )
+                    }
+
+                    // دکمه "تماس با ما"
+                    OutlinedButton(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(10.dp),
+                        onClick = {
+
+                            val dialIntent = Intent(Intent.ACTION_DIAL, Uri.parse("tel:+989991112233"))
+                            m_context.startActivity(dialIntent)
+                        }
+                    ) {
+                        Text(
+                            text = "تماس با ما",
+                            fontSize = 18.sp,
+                            fontFamily = vazirFontFamily
+                        )
+                    }
+
+                    // دکمه "درباره ما"
+                    OutlinedButton(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(10.dp),
+                        onClick = {
+                            // اضافه کردن عملکرد مورد نظر برای "درباره ما"
+                            navController.navigate("home/about/us")
+                        }
+                    ) {
+                        Text(
+                            text = "درباره ما",
+                            fontSize = 18.sp,
+                            fontFamily = vazirFontFamily
+                        )
+                    }
+
+
+                    Spacer(modifier = Modifier.fillMaxWidth().height(25.dp))
+                }
+
             }
         }
     }

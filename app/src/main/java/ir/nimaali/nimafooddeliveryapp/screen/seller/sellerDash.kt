@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.SharedPreferences
 import android.provider.CalendarContract.Colors
 import android.view.MenuItem
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -41,6 +42,8 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import ir.nimaali.nimafooddeliveryapp.data.seller.SellerHomeRequestGroup
+import ir.nimaali.nimafooddeliveryapp.models.home.order.OrderListUsersAllItem
+import ir.nimaali.nimafooddeliveryapp.models.seller.dash.SellerOrdersDashShowItem
 import ir.nimaali.nimafooddeliveryapp.screen.functions.LoadingProgressbar
 import ir.nimaali.nimafooddeliveryapp.ui.theme.BackgroundColor
 import ir.nimaali.nimafooddeliveryapp.ui.theme.PrimaryColor
@@ -54,7 +57,7 @@ import kotlinx.coroutines.withContext
 fun SellerDashboardScreen(navController: NavHostController) {
     val m_context = LocalContext.current
 
-    val userSharedPreferences =
+    val sellerSharedPreferences =
         m_context.getSharedPreferences("app_data", Context.MODE_PRIVATE)
 
     val sellerHomeRequestGroup = SellerHomeRequestGroup(m_context)
@@ -65,35 +68,18 @@ fun SellerDashboardScreen(navController: NavHostController) {
 
     var isStoreOpen by remember { mutableStateOf(true) }
     var showBottomSheet by remember { mutableStateOf(false) }
+    var listOrders by remember {
+        mutableStateOf(emptyList<SellerOrdersDashShowItem>())
+    }
 
     sellerHomeRequestGroup.getSellerStatus {
         isStoreOpen = it
         onGoingProgress=false
     }
-
-
-    val orders = listOf(
-        mapOf(
-            "customerName" to "علی رضایی",
-            "orderStatus" to "در انتظار تایید",
-            "foods" to listOf(
-                mapOf("name" to "پیتزا", "quantity" to 2),
-                mapOf("name" to "ساندویچ", "quantity" to 1)
-            ),
-            "address" to "خیابان ولیعصر، پلاک ۱۲۳",
-            "isApproved" to false,
-            "orderTime" to "۱۴:۳۰ - ۱۰ آذر ۱۴۰۲"
-        ), mapOf(
-            "customerName" to "مریم احمدی",
-            "orderStatus" to "تایید شده",
-            "foods" to listOf(
-                mapOf("name" to "برگر", "quantity" to 1)
-            ),
-            "address" to "بلوار کشاورز، پلاک ۷۸",
-            "isApproved" to true,
-            "orderTime" to "۱۵:۱۵ - ۱۰ آذر ۱۴۰۲"
-        )
-    )
+    sellerHomeRequestGroup.getNotCompleteOrderSeller {
+        listOrders=it
+        onGoingProgress=false
+    }
 
     Scaffold(topBar = {
         TopAppBar(title = {
@@ -121,7 +107,11 @@ fun SellerDashboardScreen(navController: NavHostController) {
                 }
             },
             actions = {
-                IconButton(onClick = { /* Open Menu */ }) {
+                IconButton(onClick = {
+                    sellerHomeRequestGroup.getNotCompleteOrderSeller {
+                        listOrders=it
+                        onGoingProgress=false
+                    } }) {
                     Icon(
                         Icons.Default.Refresh,
                         contentDescription = "بارگذاری دوباره",
@@ -164,7 +154,7 @@ fun SellerDashboardScreen(navController: NavHostController) {
                         title = "خروج از حساب کاربری",
                         onClick = {
                             showBottomSheet = false
-                            userSharedPreferences.edit().let {
+                            sellerSharedPreferences.edit().let {
                                 it.clear()
                                 it.apply()
                             }
@@ -228,25 +218,24 @@ fun SellerDashboardScreen(navController: NavHostController) {
                     }
                 }
 
-                if (orders.isEmpty()) {
+                if (listOrders.isEmpty()) {
                     Box(
                         modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center
                     ) {
                         Text(
-                            "هیچ سفارشی موجود نیست",
+                            "شما هیچ سفارش در حال انجام ندارید!.\n برای دریافت سفارش لطفا عذا به رستوران خود اضافه کنید",
                             style = MaterialTheme.typography.titleLarge,
                             fontFamily = vazirFontFamily
                         )
                     }
                 } else {
                     LazyColumn(modifier = Modifier.fillMaxSize()) {
-                        items(orders) { order ->
-                            val customerName = order["customerName"] as String
-                            val orderStatus = order["orderStatus"] as String
-                            val address = order["address"] as String
-                            val orderTime = order["orderTime"] as String
-                            val foods = order["foods"] as List<Map<String, Any>>
-                            val isApproved = order["isApproved"] as Boolean
+                        items(listOrders) { order ->
+                            val customerName =order.userName
+                            val orderStatus = order.status
+                            val address = order.userAddress
+                            val orderTime = order.orderDate
+                            val foods = order.foodDetails
 
                             Card(
                                 modifier = Modifier
@@ -264,7 +253,7 @@ fun SellerDashboardScreen(navController: NavHostController) {
                                     Text(
                                         "وضعیت سفارش: $orderStatus",
                                         style = MaterialTheme.typography.bodyMedium,
-                                        color = if (isApproved) Color(0xFF013220) else Color.Red
+                                        color = Color.Gray
                                     )
                                     Spacer(modifier = Modifier.height(8.dp))
                                     Text(
@@ -285,8 +274,8 @@ fun SellerDashboardScreen(navController: NavHostController) {
                                         fontFamily = vazirFontFamily
                                     )
                                     foods.forEach { food ->
-                                        val foodName = food["name"] as String
-                                        val quantity = food["quantity"] as Int
+                                        val foodName = food.foodName
+                                        val quantity = food.quantity
                                         Text(
                                             "$foodName - $quantity عدد",
                                             style = MaterialTheme.typography.bodyMedium,
@@ -299,9 +288,17 @@ fun SellerDashboardScreen(navController: NavHostController) {
                                         verticalAlignment = Alignment.CenterVertically,
                                         modifier = Modifier.fillMaxSize()
                                     ) {
-                                        if (!isApproved) {
+                                        if (orderStatus=="تایید رستوران") {
                                             Button(
-                                                onClick = { /* تایید سفارش */ },
+                                                onClick = {
+                                                    sellerHomeRequestGroup.setGettingOrderReady(order.orderId.toString()){
+                                                        Toast.makeText(m_context,"سفارش توسط شما تایید شد",Toast.LENGTH_SHORT).show()
+                                                        sellerHomeRequestGroup.getNotCompleteOrderSeller {
+                                                            listOrders=it
+                                                            onGoingProgress=false
+                                                        }
+                                                    }
+                                                },
                                                 colors = ButtonDefaults.buttonColors(
                                                     containerColor = Color(0xFF013220)
                                                 )
@@ -310,11 +307,12 @@ fun SellerDashboardScreen(navController: NavHostController) {
                                                     "تایید سفارش", fontFamily = vazirFontFamily
                                                 )
                                             }
-
                                             Spacer(modifier = Modifier.width(16.dp))
                                         }
                                         Button(
-                                            onClick = { /* مشاهده جزئیات */ },
+                                            onClick = {
+                                                navController.navigate("seller/order/detail/"+order.orderId)
+                                            },
                                             colors = ButtonDefaults.buttonColors(containerColor = Color.Blue)
                                         ) {
                                             Text(

@@ -1,11 +1,9 @@
-package ir.nimaali.nimafooddeliveryapp.screen.seller.order
-
+package ir.nimaali.nimafooddeliveryapp.screen.user.order
 
 import android.content.Context
 import android.content.SharedPreferences
 import android.provider.CalendarContract.Colors
 import android.view.MenuItem
-import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -14,10 +12,12 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.AddCircle
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.ExitToApp
 import androidx.compose.material.icons.filled.Home
@@ -45,9 +45,9 @@ import androidx.navigation.NavHostController
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
 import ir.nimaali.nimafooddeliveryapp.data.RequestEndPoints
-import ir.nimaali.nimafooddeliveryapp.data.seller.SellerHomeRequestGroup
-import ir.nimaali.nimafooddeliveryapp.models.seller.dash.SellerOrdersDashShowItem
-import ir.nimaali.nimafooddeliveryapp.models.seller.dash.orderDetail.FoodDetail
+import ir.nimaali.nimafooddeliveryapp.data.home.HomeRestaurantOderRequestGroup
+import ir.nimaali.nimafooddeliveryapp.models.home.detail.Food
+import ir.nimaali.nimafooddeliveryapp.models.user.order.Detail
 import ir.nimaali.nimafooddeliveryapp.ui.theme.BackgroundColor
 import ir.nimaali.nimafooddeliveryapp.ui.theme.PrimaryColor
 import ir.nimaali.nimafooddeliveryapp.ui.theme.SurfaceColor
@@ -55,45 +55,39 @@ import ir.nimaali.nimafooddeliveryapp.ui.theme.vazirFontFamily
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
+
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalGlideComposeApi::class)
 @Composable
-fun SellerOrderDetailScreen(
+fun UserOrderDetailScreen(
     navController: NavHostController,
-    order_id:String
+    order_id: String
 ) {
-
-
-    val m_context= LocalContext.current
-    val sellerHomeRequestGroup=SellerHomeRequestGroup(m_context)
+    val m_context = LocalContext.current
+    val homeRestaurantOderRequestGroup = HomeRestaurantOderRequestGroup(m_context)
 
     var listFoods by remember {
-        mutableStateOf(emptyList<FoodDetail>())
+        mutableStateOf(emptyList<Detail>())
     }
-    var orderStatus by remember {
+    var seller_name by remember {
         mutableStateOf("")
     }
-    var order_address by remember {
+    var status_order by remember {
         mutableStateOf("")
     }
-    var order_time by remember {
-        mutableStateOf("")
-    }
-    var user_name by remember {
+    var date_order by remember {
         mutableStateOf("")
     }
     var total_price by remember {
         mutableStateOf("")
     }
 
-    sellerHomeRequestGroup.sellerGetOrderDetailById(order_id){
-        listFoods=it.foodDetails
-        orderStatus=it.status
-        order_time=it.orderDate
-        order_address=it.userAddress
-        total_price=it.totalPrice.toInt().toString()
-
+    homeRestaurantOderRequestGroup.getUserOrderDetailByID(order_id) {
+        status_order=it.status
+        date_order=it.orderDate
+        listFoods = it.details
+        seller_name=it.seller_name
+        total_price=it.total_items.toString()
     }
-
     Scaffold(
         topBar = {
             TopAppBar(
@@ -129,32 +123,31 @@ fun SellerOrderDetailScreen(
                 .padding(16.dp)
         ) {
             Text(
-                "نام سفارش‌دهنده: "+user_name,
+                "نام رستوران: "+seller_name,
                 style = MaterialTheme.typography.bodyLarge,
                 fontFamily = vazirFontFamily
             )
             Spacer(modifier = Modifier.height(8.dp))
 
             Text(
-                "وضعیت سفارش: "+orderStatus,
-                style = MaterialTheme.typography.bodyMedium,
-                color = Color.Red
+                "وضعیت سفارش: "+status_order,
+                style = MaterialTheme.typography.bodyMedium
             )
             Spacer(modifier = Modifier.height(8.dp))
 
             Text(
-                "آدرس: "+order_address,
-                style = MaterialTheme.typography.bodyMedium,
-                fontFamily = vazirFontFamily
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-
-            Text(
-                "زمان سفارش: "+order_time,
+                "زمان سفارش: "+date_order,
                 style = MaterialTheme.typography.bodyMedium,
                 fontFamily = vazirFontFamily
             )
             Spacer(modifier = Modifier.height(16.dp))
+
+            Text(
+                "مجموع: "+total_price,
+                style = MaterialTheme.typography.bodyMedium,
+                fontFamily = vazirFontFamily
+            )
+            Spacer(modifier = Modifier.height(8.dp))
 
             Text(
                 "لیست غذاها:",
@@ -202,78 +195,29 @@ fun SellerOrderDetailScreen(
             }
 
             Spacer(modifier = Modifier.height(16.dp))
-            Text(
-                "مجموع قیمت:"+total_price,
-                style = MaterialTheme.typography.bodyLarge,
-                fontFamily = vazirFontFamily
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-
 
             Row(
                 horizontalArrangement = Arrangement.SpaceEvenly,
                 modifier = Modifier.fillMaxWidth()
             ) {
-                if (orderStatus=="تایید رستوران") {
+                if (status_order!="لغو شده") {
                     Button(
                         onClick = {
-                            sellerHomeRequestGroup.setGettingOrderReady(order_id){
-                                Toast.makeText(m_context,"سفارش توسط شما تایید شد", Toast.LENGTH_SHORT).show()
-                                navController.popBackStack()
+                            homeRestaurantOderRequestGroup.setOrderCancelByUser(order_id){
+                                navController.navigate("home_user"){
+                                    popUpTo(0)
+                                }
                             }
                         },
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = Color(0xFF013220)
+                            containerColor = Color.Red
                         )
                     ) {
-                        Text(
-                            "تایید سفارش", fontFamily = vazirFontFamily
-                        )
-                    }
-                    Spacer(modifier = Modifier.width(16.dp))
-                }
-                if (orderStatus=="در حال آماده سازی") {
-                    Button(
-                        onClick = {
-                            sellerHomeRequestGroup.setCompletedOrderReady(order_id){
-                                Toast.makeText(m_context,"ثبت تکمیل سفارش کاربر تکمیل شد ", Toast.LENGTH_SHORT).show()
-                                navController.popBackStack()
-                            }
-                        },
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = Color(0xFF013220)
-                        )
-                    ) {
-                        Text(
-                            "تکمیل سفارش", fontFamily = vazirFontFamily
-                        )
-                    }
-                    Spacer(modifier = Modifier.width(16.dp))
-                }
-                if (orderStatus!="لغو رستوران") {
-
-                    Button(
-                        onClick = {
-
-                            sellerHomeRequestGroup.setCanselBySellerOrderReady(order_id) {
-                                Toast.makeText(
-                                    m_context,
-                                    "سفارش از سمت رستوران لغو شده",
-                                    Toast.LENGTH_SHORT
-                                ).show()
-                                navController.popBackStack()
-                            }
-
-                        },
-                        colors = ButtonDefaults.buttonColors(containerColor = Color.Red)
-                    ) {
-                        Text("لغو سفارش ", fontFamily = vazirFontFamily)
+                        Text("لغو سفارش", fontFamily = vazirFontFamily)
                     }
                 }
-
 
             }
         }
     }
 }
-

@@ -64,7 +64,9 @@ fun SellerLoginScreen(navController: NavController) {
                 navigationIcon = {
                     IconButton(onClick = {
                         // عملکرد بازگشت
-                        navController.popBackStack()
+                        navController.navigate("user_login"){
+                            popUpTo(0)
+                        }
                     }) {
                         Icon(
                             imageVector = Icons.Default.Close, // آیکون بازگشت پیش‌فرض

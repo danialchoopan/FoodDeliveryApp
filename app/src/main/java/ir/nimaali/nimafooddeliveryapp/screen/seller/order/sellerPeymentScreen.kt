@@ -46,6 +46,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
+import ir.nimaali.nimafooddeliveryapp.data.seller.SellerHomeRequestGroup
+import ir.nimaali.nimafooddeliveryapp.screen.functions.LoadingProgressbar
 import ir.nimaali.nimafooddeliveryapp.ui.theme.BackgroundColor
 import ir.nimaali.nimafooddeliveryapp.ui.theme.PrimaryColor
 import ir.nimaali.nimafooddeliveryapp.ui.theme.SurfaceColor
@@ -56,12 +58,36 @@ import kotlinx.coroutines.withContext
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SellerMonthlyIncomeScreen(navHostController: NavHostController) {
-    // درآمد ماهانه
-    var monthlyIncome by remember { mutableStateOf(100000000.00) }
 
-    // تعداد سفارش‌های موفق و ناموفق
-    val successfulOrders = 120
-    val failedOrders = 10
+    val m_context = LocalContext.current
+
+    val sellerHomeRequestGroup = SellerHomeRequestGroup(m_context)
+    // درآمد ماهانه
+    var monthlyIncome by remember {
+        mutableStateOf("")
+    }
+
+    var successfulOrders by remember {
+        mutableStateOf("")
+    }
+
+    var failedOrders by remember {
+        mutableStateOf("")
+    }
+    var onGoingProgress by remember {
+        mutableStateOf(true)
+    }
+
+    sellerHomeRequestGroup.sellerGetTotalOrder { success, failed, totalOrder ->
+
+        monthlyIncome = totalOrder
+        successfulOrders = success
+        failedOrders = failed
+
+        onGoingProgress=false
+
+    }
+
 
     // نمایش دیالوگ تسویه حساب
     var showDialog by remember { mutableStateOf(false) }
@@ -69,25 +95,36 @@ fun SellerMonthlyIncomeScreen(navHostController: NavHostController) {
     if (showDialog) {
         AlertDialog(
             onDismissRequest = { showDialog = false },
-            title = { Text("تسویه حساب",
-                fontFamily = vazirFontFamily) },
-            text = { Text("آیا می‌خواهید تسویه حساب انجام دهید؟",
-                fontFamily = vazirFontFamily) },
+            title = {
+                Text(
+                    "تسویه حساب",
+                    fontFamily = vazirFontFamily
+                )
+            },
+            text = {
+                Text(
+                    "آیا می‌خواهید تسویه حساب انجام دهید؟",
+                    fontFamily = vazirFontFamily
+                )
+            },
             confirmButton = {
                 TextButton(
                     onClick = {
-                        monthlyIncome = 0.0 // به عنوان مثال درآمد را صفر می‌کنیم
                         showDialog = false
                     }
                 ) {
-                    Text("تسویه",
-                        fontFamily = vazirFontFamily)
+                    Text(
+                        "تسویه",
+                        fontFamily = vazirFontFamily
+                    )
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showDialog = false }) {
-                    Text("لغو",
-                        fontFamily = vazirFontFamily)
+                    Text(
+                        "لغو",
+                        fontFamily = vazirFontFamily
+                    )
                 }
             }
         )
@@ -96,12 +133,16 @@ fun SellerMonthlyIncomeScreen(navHostController: NavHostController) {
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("درآمد ماهانه",
-                    style = MaterialTheme.typography.headlineSmall,
-                    fontFamily = vazirFontFamily,
-                    modifier = Modifier.fillMaxWidth(),
-                    textAlign = TextAlign.Center,
-                    color = Color.White) },
+                title = {
+                    Text(
+                        "درآمد ماهانه",
+                        style = MaterialTheme.typography.headlineSmall,
+                        fontFamily = vazirFontFamily,
+                        modifier = Modifier.fillMaxWidth(),
+                        textAlign = TextAlign.Center,
+                        color = Color.White
+                    )
+                },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = Color(0xFF4CAF50)),
                 actions = {
                     IconButton(onClick = { navHostController.popBackStack() }) {
@@ -116,61 +157,73 @@ fun SellerMonthlyIncomeScreen(navHostController: NavHostController) {
             )
         },
         content = { paddingValues ->
-            Column(
-                modifier = Modifier
-                    .padding(paddingValues)
-                    .padding(18.dp)
-                    .fillMaxSize(),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                // نمایش پیام درآمد ماهانه
-                Text(
-                    "درآمد ماهانه",
-                    fontFamily = vazirFontFamily,
-                    style = TextStyle(
-                        fontSize = 18.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = Color.Black.copy(alpha = 0.87f)
+            if (onGoingProgress) {
+
+                LoadingProgressbar {
+
+                }
+
+            } else {
+                Column(
+                    modifier = Modifier
+                        .padding(paddingValues)
+                        .padding(18.dp)
+                        .fillMaxSize(),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    // نمایش پیام درآمد ماهانه
+                    Text(
+                        "درآمد ماهانه",
+                        fontFamily = vazirFontFamily,
+                        style = TextStyle(
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color.Black.copy(alpha = 0.87f)
+                        )
                     )
-                )
-                Spacer(modifier = Modifier.height(12.dp))
+                    Spacer(modifier = Modifier.height(12.dp))
 
-                Text(
-                    "${monthlyIncome.toString()} تومان",
-                    style = TextStyle(
-                        fontSize = 20.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = Color(0xFF013220)
-                    ),
-                    fontFamily = vazirFontFamily
-                )
-                Divider(modifier = Modifier.padding(vertical = 24.dp), color = Color.Gray)
+                    Text(
+                        "${monthlyIncome.toString()} تومان",
+                        style = TextStyle(
+                            fontSize = 20.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color(0xFF013220)
+                        ),
+                        fontFamily = vazirFontFamily
+                    )
+                    Divider(modifier = Modifier.padding(vertical = 24.dp), color = Color.Gray)
 
-                // تعداد سفارش‌های موفق
-                Text(
-                    "تعداد سفارش‌های موفق: $successfulOrders",
-                    style = TextStyle(fontSize = 16.sp, color = Color(0xFF013220),
-                        fontFamily = vazirFontFamily)
-                )
-                Spacer(modifier = Modifier.height(8.dp))
+                    // تعداد سفارش‌های موفق
+                    Text(
+                        "تعداد سفارش‌های موفق: $successfulOrders",
+                        style = TextStyle(
+                            fontSize = 16.sp, color = Color(0xFF013220),
+                            fontFamily = vazirFontFamily
+                        )
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
 
-                // تعداد سفارش‌های ناموفق
-                Text(
-                    "تعداد سفارش‌های ناموفق: $failedOrders",
-                    fontFamily = vazirFontFamily,
-                    style = TextStyle(fontSize = 16.sp, color = Color.Red.copy(alpha = 0.7f))
-                )
-                Divider(modifier = Modifier.padding(vertical = 24.dp), color = Color.Gray)
+                    // تعداد سفارش‌های ناموفق
+                    Text(
+                        "تعداد سفارش‌های ناموفق: $failedOrders",
+                        fontFamily = vazirFontFamily,
+                        style = TextStyle(fontSize = 16.sp, color = Color.Red.copy(alpha = 0.7f))
+                    )
+                    Divider(modifier = Modifier.padding(vertical = 24.dp), color = Color.Gray)
 
-                // دکمه تسویه حساب اگر درآمد بیشتر از 100,000 تومان باشد
-                if (monthlyIncome > 100000) {
-                    Button(
-                        onClick = { showDialog = true },
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Text("تسویه حساب",
-                            style = MaterialTheme.typography.titleMedium,
-                            fontFamily = vazirFontFamily,)
+                    // دکمه تسویه حساب اگر درآمد بیشتر از 100,000 تومان باشد
+                    if (monthlyIncome.toInt() > 100000) {
+                        Button(
+                            onClick = { showDialog = true },
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Text(
+                                "تسویه حساب",
+                                style = MaterialTheme.typography.titleMedium,
+                                fontFamily = vazirFontFamily,
+                            )
+                        }
                     }
                 }
             }
