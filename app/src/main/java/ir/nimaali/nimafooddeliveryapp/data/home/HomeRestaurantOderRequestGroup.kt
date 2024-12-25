@@ -69,7 +69,8 @@ class HomeRestaurantOderRequestGroup(val m_context: Context) {
             foods: List<Food>,
             comments: List<Comment>,
             category: String,
-            address: String
+            address: String,
+            imageR: String
         ) -> Unit
     ) {
         val jsonRequest = object : JsonObjectRequest(
@@ -83,6 +84,7 @@ class HomeRestaurantOderRequestGroup(val m_context: Context) {
                     val name = restaurants.getString("restaurant_name")
                     val category = restaurants.getString("restaurant_category")
                     val address = restaurants.getString("restaurant_address")
+                    val imageR = restaurants.getString("restaurant_image")
 
                     // پردازش لیست غذاها
                     val foodsArray = restaurants.getJSONArray("foods")
@@ -117,7 +119,7 @@ class HomeRestaurantOderRequestGroup(val m_context: Context) {
                     }
 
                     // ارسال داده‌ها به صورت پارامترهای جداگانه
-                    result(name, foods, comments, category, address)
+                    result(name, foods, comments, category, address,imageR)
 
                 } catch (e: JSONException) {
                     e.printStackTrace()

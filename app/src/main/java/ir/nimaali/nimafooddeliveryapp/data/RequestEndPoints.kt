@@ -56,6 +56,9 @@ object RequestEndPoints {
     val sellerOrderCompleted="$rootDomainApi/seller/orders/completed"
     val sellerOrderCancel="$rootDomainApi/seller/orders/cancel"
 
+    val sellerGetBanner="$rootDomainApi/seller/banner"
+    val sellerUpdateBanner="$rootDomainApi/seller/banner/update"
+
 
     val sellerTotalOrder="$rootDomainApi/seller/orders/total"
 

@@ -26,6 +26,7 @@ import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.ExitToApp
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.List
@@ -71,11 +72,23 @@ fun UserDetailRestaurantScreen(navController: NavController, restaurant_id: Stri
     val m_context = LocalContext.current
     val rememberScroll = rememberScrollState()
     // داده‌های نمونه
-    var restaurantName = "رستوران نمونه"
-    var restaurantCategory = "ایرانی و سنتی"
-    var restaurantAddress = "ادرس"
+    var restaurantName by remember {
+        mutableStateOf("")
+    }
+    var restaurantCategory by remember {
+        mutableStateOf("")
+    }
+    var restaurantAddress by remember {
+        mutableStateOf("")
+    }
+    var restaurantImage by remember {
+        mutableStateOf("")
+    }
+
+
 
     var orderDetails by remember { mutableStateOf<List<Pair<Int, Int>>>(emptyList()) }
+    var showCommentDialog by remember { mutableStateOf(false) }
 
 
     var loading by remember {
@@ -92,6 +105,11 @@ fun UserDetailRestaurantScreen(navController: NavController, restaurant_id: Stri
     val quantities = remember { mutableStateListOf<Int>() }
 
     val homeRestaurantOderRequestGroup = HomeRestaurantOderRequestGroup(m_context)
+
+
+    val userSharedPreferences = m_context.getSharedPreferences("app_data", Context.MODE_PRIVATE)
+
+    val user_id = userSharedPreferences.getString("user_id", "")
 
     Scaffold(
         topBar = {
@@ -122,11 +140,11 @@ fun UserDetailRestaurantScreen(navController: NavController, restaurant_id: Stri
         modifier = Modifier.fillMaxSize(),
         content = { padding ->
 
-            homeRestaurantOderRequestGroup.homePageRestaurantDetailById(restaurant_id) { name, foods, comments, category, address ->
+            homeRestaurantOderRequestGroup.homePageRestaurantDetailById(restaurant_id) { name, foods, comments, category, address, image ->
                 restaurantName = name
                 restaurantCategory = category
                 restaurantAddress = address
-
+                restaurantImage=image
                 if (!foods.isNullOrEmpty()) {
                     listFoods = foods
                     quantities.clear() // پاک کردن مقادیر قبلی
@@ -148,14 +166,14 @@ fun UserDetailRestaurantScreen(navController: NavController, restaurant_id: Stri
                 if (loading) {
                     LoadingProgressbar {}
                 } else {
-//                    GlideImage(
-//                        model = RequestEndPoints.rootDomain + "/" + restaurant.image,
-//                        contentDescription = "",
-//                        contentScale = ContentScale.Crop,
-//                        modifier = Modifier
-//                            .fillMaxWidth()
-//                            .height(150.dp),
-//                    )
+                    GlideImage(
+                        model = RequestEndPoints.rootDomain + "/" + restaurantImage,
+                        contentDescription = "",
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(160.dp),
+                    )
                     // اطلاعات رستوران
                     Column(modifier = Modifier.padding(16.dp)) {
                         Text(
@@ -254,8 +272,11 @@ fun UserDetailRestaurantScreen(navController: NavController, restaurant_id: Stri
                     if (orderDetails.isNotEmpty()) {
                         if (showDialog) {
                             ConfirmOrderDialog({
-                                restaurantName=orderDetails.toString()
-                                homeRestaurantOderRequestGroup.placeOrder(restaurant_id,orderDetails.toString()){
+                                restaurantName = orderDetails.toString()
+                                homeRestaurantOderRequestGroup.placeOrder(
+                                    restaurant_id,
+                                    orderDetails.toString()
+                                ) {
                                     navController.navigate("home_user") {
                                         popUpTo(0)
                                     }
@@ -274,12 +295,31 @@ fun UserDetailRestaurantScreen(navController: NavController, restaurant_id: Stri
                     Spacer(modifier = Modifier.height(16.dp))
 
                     // کامنت‌ها
-                    Text(
-                        text = "نظرات کاربران",
-                        style = MaterialTheme.typography.headlineSmall,
-                        modifier = Modifier.padding(horizontal = 16.dp),
-                        fontFamily = vazirFontFamily
-                    )
+                    Row(
+                        modifier = Modifier.fillMaxWidth().padding(8.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                    ) {
+                        Text(
+                            text = "نظرات کاربران",
+                            style = MaterialTheme.typography.headlineSmall,
+                            modifier = Modifier.padding(horizontal = 16.dp),
+                            fontFamily = vazirFontFamily
+                        )
+
+                        Button(
+                            onClick = {
+                                showCommentDialog = true
+                            }
+                        ) {
+                            Text("نوشتن نظر")
+                        }
+                    }
+                    if (showCommentDialog) {
+                        CommentDialog(restaurant_id, {
+                            showCommentDialog = false
+                        })
+                    }
 
                     if (listComment.isNotEmpty()) {
                         LazyColumn(
@@ -289,15 +329,45 @@ fun UserDetailRestaurantScreen(navController: NavController, restaurant_id: Stri
                             verticalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
                             items(listComment) {
-                                Text(
-                                    text = it.commentContent,
-                                    style = MaterialTheme.typography.bodyLarge,
-                                    color = Color.Gray,
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .background(Color(0xFFF5F5F5), RoundedCornerShape(8.dp))
-                                        .padding(16.dp)
-                                )
+                                if (it.commentUserId.toString().trim() == user_id.toString()
+                                        .trim()
+                                ) {
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.SpaceBetween,
+                                        modifier = Modifier.fillMaxWidth().background(Color(0xFFF5F5F5),
+                                        RoundedCornerShape(8.dp)).padding(8.dp)
+                                    ) {
+                                        Text(
+                                            text = it.commentContent,
+                                            style = MaterialTheme.typography.bodyLarge,
+                                            color = Color.Gray,
+                                        )
+                                        IconButton(onClick = {
+                                            loading=true
+                                            homeRestaurantOderRequestGroup.DeleteCommentDetail(it.commentId.toString()) {
+                                                loading=false
+                                                Toast.makeText(m_context,"نظر شما با موفقیت حذف شد!",Toast.LENGTH_SHORT).show()
+                                            }
+                                        }) {
+                                            Icon(
+                                                imageVector = Icons.Default.Delete,
+                                                contentDescription = "حذف",
+                                                tint = Color.Red
+                                            )
+                                        }
+                                    }
+                                } else {
+                                    Text(
+                                        text = it.commentContent,
+                                        style = MaterialTheme.typography.bodyLarge,
+                                        color = Color.Gray,
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .background(Color(0xFFF5F5F5), RoundedCornerShape(8.dp))
+                                            .padding(16.dp)
+                                    )
+                                }
                             }
                         }
                     } else {
@@ -310,6 +380,7 @@ fun UserDetailRestaurantScreen(navController: NavController, restaurant_id: Stri
                     }
                 }
             }
+            Spacer(modifier = Modifier.height(70.dp))
         }
     )
 }
@@ -401,6 +472,60 @@ fun ConfirmOrderDialog(
                 }
             ) {
                 Text("لغو")
+            }
+        }
+    )
+
+}
+
+@Composable
+fun CommentDialog(
+    seller_id: String,
+    onDismissRequest: () -> Unit,
+) {
+    val homeRestaurantOderRequestGroup = HomeRestaurantOderRequestGroup(LocalContext.current)
+    var comment_user by remember {
+        mutableStateOf("")
+    }
+    AlertDialog(
+        onDismissRequest = {
+            // جلوگیری از بسته شدن دیالوگ با کلیک بیرون
+        },
+        title = {
+            Text(
+                text = "کامنت شما",
+                style = MaterialTheme.typography.headlineSmall,
+                fontFamily = vazirFontFamily
+            )
+        },
+        text = {
+            Column {
+                OutlinedTextField(
+                    value = comment_user,
+                    onValueChange = { comment_user = it },
+                    label = { Text("نظر کاربر") },
+                    modifier = Modifier.fillMaxWidth(),
+                    maxLines = 1
+                )
+            }
+        },
+        confirmButton = {
+            Button(
+                onClick = {
+                    homeRestaurantOderRequestGroup.AddCommentDetail(seller_id, comment_user) {
+                        onDismissRequest()
+                    }
+                }
+            ) {
+                Text(text = "ارسال", fontFamily = vazirFontFamily)
+            }
+            Spacer(Modifier.width(20.dp))
+        },
+        dismissButton = {
+            Button(
+                onClick = { onDismissRequest() } // عملکرد بستن
+            ) {
+                Text(text = "بستن", fontFamily = vazirFontFamily)
             }
         }
     )

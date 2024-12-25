@@ -5,5 +5,6 @@ data class UserData(
     val phone: String,
     val address: String,
     val city_name: String,
-    val token: String
+    val token: String,
+    val id: String
 )

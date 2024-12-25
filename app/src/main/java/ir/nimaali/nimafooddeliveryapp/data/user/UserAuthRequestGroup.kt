@@ -1,15 +1,24 @@
 package ir.nimaali.nimafooddeliveryapp.data.user
 
 import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.net.Uri
+import android.util.Base64
 import android.util.Log
+import com.android.volley.Response
 import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.StringRequest
 import com.google.gson.Gson
 import ir.nimaali.nimafooddeliveryapp.data.RequestEndPoints
 import ir.nimaali.nimafooddeliveryapp.data.VolleySingleTon
+import ir.nimaali.nimafooddeliveryapp.models.home.detail.Comment
+import ir.nimaali.nimafooddeliveryapp.models.home.detail.Food
 import ir.nimaali.nimafooddeliveryapp.models.user.UserSellerRegisterLogin
 import org.json.JSONException
 import org.json.JSONObject
+import java.io.ByteArrayOutputStream
+import java.io.InputStream
 
 class UserAuthRequestGroup(val m_context: Context) {
 
@@ -46,12 +55,12 @@ class UserAuthRequestGroup(val m_context: Context) {
                         it.putString("has_login", "user")
                     }.apply()
                 } catch (e: Exception) {
-                    resultRequest(false, UserSellerRegisterLogin("", "", "", "", ""))
+                    resultRequest(false, UserSellerRegisterLogin("", "", "", "", "",""))
                 }
             },
             { error ->
                 error.printStackTrace()
-                resultRequest(false, UserSellerRegisterLogin("", "", "", "", ""))
+                resultRequest(false, UserSellerRegisterLogin("", "", "", "", "",""))
             }
         ) {
             override fun getHeaders(): MutableMap<String, String> {
@@ -112,14 +121,15 @@ class UserAuthRequestGroup(val m_context: Context) {
                         it.putString("user_name", loginResult.name)
                         it.putString("user_phone", phone)
                         it.putString("user_city", loginResult.cityName)
+                        it.putString("user_id", loginResult.id)
                     }.apply()
                 } catch (e: Exception) {
-                    resultRequest(false, UserSellerRegisterLogin("", "", "", "", ""))
+                    resultRequest(false, UserSellerRegisterLogin("", "", "", "", "",""))
                 }
             },
             { error ->
                 error.printStackTrace()
-                resultRequest(false, UserSellerRegisterLogin("", "", "", "", ""))
+                resultRequest(false, UserSellerRegisterLogin("", "", "", "", "",""))
             }
         ) {
             override fun getHeaders(): MutableMap<String, String> {
@@ -166,12 +176,12 @@ class UserAuthRequestGroup(val m_context: Context) {
                     }.apply()
                 } catch (e: Exception) {
                     e.printStackTrace()
-                    resultRequest(false, UserSellerRegisterLogin("", "", "", "", ""))
+                    resultRequest(false, UserSellerRegisterLogin("", "", "", "", "",""))
                 }
             },
             { error ->
                 error.printStackTrace()
-                resultRequest(false, UserSellerRegisterLogin("", "", "", "", ""))
+                resultRequest(false, UserSellerRegisterLogin("", "", "", "", "",""))
             }
         ) {
             override fun getHeaders(): MutableMap<String, String> {
@@ -213,12 +223,12 @@ class UserAuthRequestGroup(val m_context: Context) {
                     }.apply()
                 } catch (e: Exception) {
                     e.printStackTrace()
-                    resultRequest(false, UserSellerRegisterLogin("", "", "", "", ""))
+                    resultRequest(false, UserSellerRegisterLogin("", "", "", "", "",""))
                 }
             },
             { error ->
                 error.printStackTrace()
-                resultRequest(false, UserSellerRegisterLogin("", "", "", "", ""))
+                resultRequest(false, UserSellerRegisterLogin("", "", "", "", "",""))
             }
         ) {
             override fun getHeaders(): MutableMap<String, String> {
@@ -240,8 +250,8 @@ class UserAuthRequestGroup(val m_context: Context) {
         val jsonRequest = object : JsonObjectRequest(
             Method.POST, RequestEndPoints.userEditPassword,
             JSONObject().apply {
-                put("oldPassword", oldPassword)
-                put("newPassword", newPassword)
+                put("old_password", oldPassword)
+                put("new_password", newPassword)
             },
             { response ->
                 try {
@@ -315,5 +325,164 @@ class UserAuthRequestGroup(val m_context: Context) {
 
         VolleySingleTon.getInstance(m_context).addToRequestQueue(jsonRequest)
     }
+
+
+    //edit user city name
+    fun sellerEditCityName(
+        newCityName: String,
+        result: (success: Boolean) -> Unit,
+    ) {
+        val jsonRequest = object : JsonObjectRequest(
+            Method.POST, RequestEndPoints.sellerEditCityName,
+            JSONObject().apply {
+                put("new_city_name", newCityName)
+            },
+            { response ->
+                try {
+                    val responseRequest = response.getBoolean("success")
+                    if (responseRequest) {
+                        result(true)
+                        userSharedPreferences.edit().also {
+                            it.putString("seller_city", newCityName)
+                        }.apply()
+                    } else {
+                        result(false)
+                    }
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    result(false)
+                }
+            },
+            { error ->
+                error.printStackTrace()
+                result(false)
+            }
+        ) {
+            override fun getHeaders(): MutableMap<String, String> {
+                val headers = HashMap<String, String>()
+                val tokenUser = userSharedPreferences.getString("seller_token", "")
+                headers["Authorization"] = "Bearer $tokenUser"
+                headers["Content-Type"] = "application/json"
+                return headers
+            }
+        }
+
+        VolleySingleTon.getInstance(m_context).addToRequestQueue(jsonRequest)
+    }
+
+    fun sellerEditPasswordEdit(
+        oldPassword: String,
+        newPassword: String,
+        result: (success: Boolean) -> Unit,
+    ) {
+        val jsonRequest = object : JsonObjectRequest(
+            Method.POST, RequestEndPoints.sellerEditPassword,
+            JSONObject().apply {
+                put("old_password", oldPassword)
+                put("new_password", newPassword)
+            },
+            { response ->
+                try {
+                    val responseRequest = response.getBoolean("success")
+                    if (responseRequest) {
+                        result(false)
+                    } else {
+                        result(true)
+                    }
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    result(false)
+                }
+            },
+            { error ->
+                error.printStackTrace()
+                result(false)
+            }
+        ) {
+            override fun getHeaders(): MutableMap<String, String> {
+                val headers = HashMap<String, String>()
+                val tokenUser = userSharedPreferences.getString("seller_token", "")
+                headers["Authorization"] = "Bearer $tokenUser"
+                headers["Content-Type"] = "application/json"
+                return headers
+            }
+        }
+
+        VolleySingleTon.getInstance(m_context).addToRequestQueue(jsonRequest)
+    }
+    fun convertImageToBase64(inputStream: InputStream): String {
+        val bitmap = BitmapFactory.decodeStream(inputStream)
+        val outputStream = ByteArrayOutputStream()
+        bitmap.compress(Bitmap.CompressFormat.JPEG, 100, outputStream)
+        val byteArray = outputStream.toByteArray()
+        return Base64.encodeToString(byteArray, Base64.DEFAULT)
+    }
+
+    fun addBannerSeller(
+        imageUri: Uri?
+    ) {
+        // Convert the image URI to a Base64 string
+        val base64Image = imageUri?.let { uri ->
+            m_context.contentResolver.openInputStream(uri)?.let { inputStream ->
+                convertImageToBase64(inputStream)
+            }
+        }
+        // Send the request
+        val jsonObjectRequest = object : JsonObjectRequest(
+            Method.PUT, RequestEndPoints.sellerUpdateBanner, JSONObject().apply {
+                put("photo", base64Image ?: "")
+            },
+            Response.Listener { response ->
+
+            },
+            Response.ErrorListener { error ->
+                println(error)
+            }
+        ) {
+            override fun getHeaders(): MutableMap<String, String> {
+                val headers = HashMap<String, String>()
+                val tokenSeller = userSharedPreferences.getString("seller_token", "")
+                headers["Authorization"] = "Bearer $tokenSeller"
+                headers["Content-Type"] = "application/json"
+                return headers
+            }
+        }
+        VolleySingleTon.getInstance(m_context).addToRequestQueue(jsonObjectRequest)
+    }
+
+    fun getSellerBanner(
+        result: (img: String, ) -> Unit
+    ) {
+        val jsonRequest = object : JsonObjectRequest(
+            Method.GET, RequestEndPoints.sellerGetBanner ,
+            JSONObject(),
+            { response ->
+                try {
+                    // استخراج داده‌های JSON
+                    val img = response.getString("img")
+                    result(img)
+
+                } catch (e: JSONException) {
+                    e.printStackTrace()
+                    // مدیریت خطای JSON
+                }
+            },
+            { error ->
+                error.printStackTrace()
+                // مدیریت خطا
+            }
+        ) {
+            override fun getHeaders(): MutableMap<String, String> {
+                val headers = HashMap<String, String>()
+                val tokenUser = userSharedPreferences.getString("seller_token", "")
+                headers["Authorization"] = "Bearer $tokenUser"
+                headers["Content-Type"] = "application/json"
+                return headers
+            }
+        }
+
+        VolleySingleTon.getInstance(m_context).addToRequestQueue(jsonRequest)
+    }
+
 
 }

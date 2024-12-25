@@ -149,6 +149,10 @@ fun SellerDashboardScreen(navController: NavHostController) {
                         navController.navigate("seller/payment")
                         showBottomSheet = false
                     })
+                    MenuItem(icon = Icons.Default.Person, title = "ویرایش اطلاعات", onClick = {
+                        navController.navigate("seller/edit")
+                        showBottomSheet = false
+                    })
                     MenuItem(
                         icon = Icons.Default.ExitToApp,
                         title = "خروج از حساب کاربری",

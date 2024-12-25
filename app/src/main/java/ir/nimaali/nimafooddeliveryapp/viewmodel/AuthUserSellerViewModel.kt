@@ -16,6 +16,7 @@ class AuthUserSellerViewModel : ViewModel() {
             userSharedPreferences.getString("user_address", "").toString(),
             userSharedPreferences.getString("user_city", "").toString(),
             userSharedPreferences.getString("user_token", "").toString(),
+            userSharedPreferences.getString("user_id", "").toString(),
         )
         return user
     }
@@ -73,6 +74,7 @@ class AuthUserSellerViewModel : ViewModel() {
                         it.putString("user_phone",phone)
                         it.putString("user_address",address)
                         it.putString("user_city",city_name)
+                        it.putString("user_id",registerResponse.id)
                     }.apply()
                 }
                 result(success)
@@ -125,6 +127,7 @@ class AuthUserSellerViewModel : ViewModel() {
                         it.putString("seller_city",city_name)
                         it.putString("seller_address",address)
                         it.putString("seller_category",city_name)
+                        it.putString("seller_id",registerResponse.id)
                     }.apply()
                 }
                 result(success)

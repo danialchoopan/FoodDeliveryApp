@@ -17,6 +17,9 @@ import ir.nimaali.nimafooddeliveryapp.screen.auth.SellerRegisterScreen
 import ir.nimaali.nimafooddeliveryapp.screen.auth.UserLoginScreen
 import ir.nimaali.nimafooddeliveryapp.screen.auth.UserRegisterScreen
 import ir.nimaali.nimafooddeliveryapp.screen.seller.SellerDashboardScreen
+import ir.nimaali.nimafooddeliveryapp.screen.seller.edit.EditSellerPasswordScreen
+import ir.nimaali.nimafooddeliveryapp.screen.seller.edit.EditSellerScreen
+import ir.nimaali.nimafooddeliveryapp.screen.seller.edit.SellerEditBannerScreen
 import ir.nimaali.nimafooddeliveryapp.screen.seller.food.SellerAddFoodScreen
 import ir.nimaali.nimafooddeliveryapp.screen.seller.food.SellerEditFoodScreen
 import ir.nimaali.nimafooddeliveryapp.screen.seller.food.SellerFoodDetailsScreen
@@ -129,6 +132,16 @@ class MainActivity : ComponentActivity() {
                         composable("seller/payment") {
                             SellerMonthlyIncomeScreen(navController)
                         }
+                        composable("seller/edit") {
+                            EditSellerScreen(navController)
+                        }
+                        composable("seller/edit/banner") {
+                            SellerEditBannerScreen(navController)
+                        }
+                        composable("seller/edit/password") {
+                            EditSellerPasswordScreen(navController)
+                        }
+
 
                     }
                 }

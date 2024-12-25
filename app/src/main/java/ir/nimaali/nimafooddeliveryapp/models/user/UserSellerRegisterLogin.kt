@@ -13,5 +13,7 @@ data class UserSellerRegisterLogin(
     @SerializedName("phone")
     val phone: String,
     @SerializedName("token")
-    val token: String
+    val token: String,
+    @SerializedName("id")
+    val id: String
 )

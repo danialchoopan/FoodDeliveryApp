@@ -122,7 +122,7 @@ fun SellerFoodListScreen(navHostController: NavHostController) {
                     modifier = Modifier.fillMaxSize()
                 ) {
                     Text(
-                        "رستورانی در شهر شما قابل ارائه سرویس نمی باشد!",
+                        "شما هنوز غذایی را اضافه نکرده اید",
                         color = MaterialTheme.colorScheme.error
                     )
 
