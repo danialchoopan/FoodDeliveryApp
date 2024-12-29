@@ -114,6 +114,15 @@ fun AboutUsScreen(navController: NavController) {
                 lineHeight = 24.sp
             )
 
+            Spacer(modifier = Modifier.height(2.dp))
+            Text(
+                text = """
+                    نیماعلی آبادی
+                """.trimIndent(),
+                fontSize = 18.sp,
+                fontFamily = vazirFontFamily,
+            )
+
             Spacer(modifier = Modifier.height(16.dp))
 
 

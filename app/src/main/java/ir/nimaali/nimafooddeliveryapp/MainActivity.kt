@@ -22,7 +22,6 @@ import ir.nimaali.nimafooddeliveryapp.screen.seller.edit.EditSellerScreen
 import ir.nimaali.nimafooddeliveryapp.screen.seller.edit.SellerEditBannerScreen
 import ir.nimaali.nimafooddeliveryapp.screen.seller.food.SellerAddFoodScreen
 import ir.nimaali.nimafooddeliveryapp.screen.seller.food.SellerEditFoodScreen
-import ir.nimaali.nimafooddeliveryapp.screen.seller.food.SellerFoodDetailsScreen
 import ir.nimaali.nimafooddeliveryapp.screen.seller.food.SellerFoodListScreen
 import ir.nimaali.nimafooddeliveryapp.screen.seller.order.SellerMonthlyIncomeScreen
 import ir.nimaali.nimafooddeliveryapp.screen.seller.order.SellerOrderDetailScreen
@@ -35,6 +34,7 @@ import ir.nimaali.nimafooddeliveryapp.screen.user.order.UserOrderDetailScreen
 import ir.nimaali.nimafooddeliveryapp.screen.user.order.UserOrdersAllScreen
 import ir.nimaali.nimafooddeliveryapp.screen.user.us.AboutUsScreen
 import ir.nimaali.nimafooddeliveryapp.ui.theme.NimaFoodDeliveryAppTheme
+import java.text.DecimalFormat
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -116,9 +116,6 @@ class MainActivity : ComponentActivity() {
                             SellerEditFoodScreen(food_it.toString(),navController)
                         }
 
-                        composable("seller/food/detail") {
-                            SellerFoodDetailsScreen(navController)
-                        }
 
 
                         //order
@@ -155,4 +152,9 @@ fun RightToLeftLayout(content: @Composable () -> Unit) {
     CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
         content()
     }
+}
+
+fun formatPrice(number: String): String {
+    val decimalFormat = DecimalFormat("###,###")
+    return decimalFormat.format(number.toInt())
 }

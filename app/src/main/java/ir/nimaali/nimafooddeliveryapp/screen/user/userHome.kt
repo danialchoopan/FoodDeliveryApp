@@ -42,6 +42,7 @@ import com.bumptech.glide.integration.compose.GlideImage
 import ir.nimaali.nimafooddeliveryapp.data.RequestEndPoints
 import ir.nimaali.nimafooddeliveryapp.data.home.HomeRestaurantOderRequestGroup
 import ir.nimaali.nimafooddeliveryapp.data.user.UserAuthRequestGroup
+import ir.nimaali.nimafooddeliveryapp.formatPrice
 import ir.nimaali.nimafooddeliveryapp.models.home.Restaurant
 import ir.nimaali.nimafooddeliveryapp.models.home.order.OrderListUsersAllItem
 import ir.nimaali.nimafooddeliveryapp.screen.functions.LoadingProgressbar
@@ -504,7 +505,7 @@ fun ProfileScreen(
                     Spacer(modifier = Modifier.fillMaxWidth().height(8.dp))
                     // نمایش مجموع قیمت سفارش‌ها
                     Text(
-                        text = "مجموع قیمت سفارش‌ها: " + userTotal + " تومان ",
+                        text = "مجموع قیمت سفارش‌ها: " + formatPrice(userTotal) + " تومان ",
                         fontSize = 16.sp,
                         fontFamily = vazirFontFamily,
                         modifier = Modifier.padding(10.dp)

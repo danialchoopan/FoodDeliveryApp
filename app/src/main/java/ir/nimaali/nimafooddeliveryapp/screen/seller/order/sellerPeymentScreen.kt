@@ -47,6 +47,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import ir.nimaali.nimafooddeliveryapp.data.seller.SellerHomeRequestGroup
+import ir.nimaali.nimafooddeliveryapp.formatPrice
 import ir.nimaali.nimafooddeliveryapp.screen.functions.LoadingProgressbar
 import ir.nimaali.nimafooddeliveryapp.ui.theme.BackgroundColor
 import ir.nimaali.nimafooddeliveryapp.ui.theme.PrimaryColor
@@ -184,7 +185,7 @@ fun SellerMonthlyIncomeScreen(navHostController: NavHostController) {
                     Spacer(modifier = Modifier.height(12.dp))
 
                     Text(
-                        "${monthlyIncome.toString()} تومان",
+                        "${formatPrice(monthlyIncome)} تومان",
                         style = TextStyle(
                             fontSize = 20.sp,
                             fontWeight = FontWeight.Bold,

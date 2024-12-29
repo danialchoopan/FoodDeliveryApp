@@ -46,6 +46,7 @@ import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
 import ir.nimaali.nimafooddeliveryapp.data.RequestEndPoints
 import ir.nimaali.nimafooddeliveryapp.data.home.HomeRestaurantOderRequestGroup
+import ir.nimaali.nimafooddeliveryapp.formatPrice
 import ir.nimaali.nimafooddeliveryapp.models.home.detail.Food
 import ir.nimaali.nimafooddeliveryapp.models.user.order.Detail
 import ir.nimaali.nimafooddeliveryapp.ui.theme.BackgroundColor
@@ -143,7 +144,7 @@ fun UserOrderDetailScreen(
             Spacer(modifier = Modifier.height(16.dp))
 
             Text(
-                "مجموع: "+total_price,
+                "مجموع: "+ formatPrice(total_price),
                 style = MaterialTheme.typography.bodyMedium,
                 fontFamily = vazirFontFamily
             )
@@ -185,7 +186,7 @@ fun UserOrderDetailScreen(
                                 color = Color.Black
                             )
                             Text(
-                                text = "${food.price} تومان",
+                                text = "${formatPrice(food.price.toString())}  تومان",
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = Color(0xFF4CAF50)
                             )

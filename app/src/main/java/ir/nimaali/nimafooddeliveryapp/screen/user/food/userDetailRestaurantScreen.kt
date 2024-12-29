@@ -53,6 +53,7 @@ import com.bumptech.glide.integration.compose.GlideImage
 import ir.nimaali.nimafooddeliveryapp.data.RequestEndPoints
 import ir.nimaali.nimafooddeliveryapp.data.home.HomeRestaurantOderRequestGroup
 import ir.nimaali.nimafooddeliveryapp.data.user.UserAuthRequestGroup
+import ir.nimaali.nimafooddeliveryapp.formatPrice
 import ir.nimaali.nimafooddeliveryapp.models.home.Restaurant
 import ir.nimaali.nimafooddeliveryapp.models.home.detail.Comment
 import ir.nimaali.nimafooddeliveryapp.models.home.detail.Food
@@ -109,6 +110,7 @@ fun UserDetailRestaurantScreen(navController: NavController, restaurant_id: Stri
 
     val userSharedPreferences = m_context.getSharedPreferences("app_data", Context.MODE_PRIVATE)
 
+    var totalPrice by remember { mutableStateOf(0) }
     val user_id = userSharedPreferences.getString("user_id", "")
 
     Scaffold(
@@ -218,7 +220,9 @@ fun UserDetailRestaurantScreen(navController: NavController, restaurant_id: Stri
                                     food = food,
                                     index = index,
                                     quantities = quantities,
-                                    onQuantityChange = { i, change ->
+                                    price=totalPrice,
+                                    onQuantityChange = { i, change,price ->
+                                        totalPrice=price
                                         // بروزرسانی تعداد غذا
                                         if (i < quantities.size) {
                                             quantities[i] =
@@ -236,6 +240,14 @@ fun UserDetailRestaurantScreen(navController: NavController, restaurant_id: Stri
                     } else {
                         Text("این رستوران در حال حاضر غذایی ثبت نکرده است!")
                     }
+
+                    Spacer(modifier = Modifier.height(6.dp))
+
+                    Text(
+                        text = "مجموع : " + formatPrice(totalPrice.toString()),
+                        style = MaterialTheme.typography.titleSmall,
+                        color = Color(0xFF4CAF50)
+                    )
 
                     Spacer(modifier = Modifier.height(6.dp))
 
@@ -387,7 +399,7 @@ fun UserDetailRestaurantScreen(navController: NavController, restaurant_id: Stri
 
 @OptIn(ExperimentalGlideComposeApi::class)
 @Composable
-fun DishItem(food: Food, index: Int, quantities: List<Int>, onQuantityChange: (Int, Int) -> Unit) {
+fun DishItem(food: Food, index: Int,price:Int, quantities: List<Int>, onQuantityChange: (Int, Int,Int) -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -395,6 +407,9 @@ fun DishItem(food: Food, index: Int, quantities: List<Int>, onQuantityChange: (I
             .padding(8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
+        var tprice by remember {
+            mutableStateOf(price)
+        }
         // تصویر غذا
         GlideImage(
             model = RequestEndPoints.rootDomain + "/" + food.foodImage,
@@ -419,7 +434,7 @@ fun DishItem(food: Food, index: Int, quantities: List<Int>, onQuantityChange: (I
                 color = Color.Gray
             )
             Text(
-                text = "${food.foodPrice} تومان",
+                text = "${formatPrice(food.foodPrice)} تومان",
                 style = MaterialTheme.typography.bodyMedium,
                 color = Color(0xFF4CAF50)
             )
@@ -427,7 +442,12 @@ fun DishItem(food: Food, index: Int, quantities: List<Int>, onQuantityChange: (I
 
         // کنترل تعداد
         Row(verticalAlignment = Alignment.CenterVertically) {
-            IconButton(onClick = { onQuantityChange(index, -1) }) {
+            IconButton(onClick = {
+                onQuantityChange(index, -1,0)
+
+                tprice=tprice-food.foodPrice.toInt();
+
+            }) {
                 Icon(Icons.Default.Clear, contentDescription = "کاهش تعداد", tint = Color.Red)
             }
             Text(
@@ -435,8 +455,12 @@ fun DishItem(food: Food, index: Int, quantities: List<Int>, onQuantityChange: (I
                 style = MaterialTheme.typography.bodyLarge,
                 color = Color.Black
             )
-            IconButton(onClick = { onQuantityChange(index, 1) }) {
+            IconButton(onClick = { onQuantityChange(index, 1,0)
+
+                tprice=tprice+food.foodPrice.toInt();
+            }) {
                 Icon(Icons.Default.Add, contentDescription = "افزایش تعداد", tint = Color.Green)
+
             }
         }
     }
