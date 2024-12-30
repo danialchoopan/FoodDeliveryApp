@@ -154,7 +154,16 @@ fun RightToLeftLayout(content: @Composable () -> Unit) {
     }
 }
 
-fun formatPrice(number: String): String {
-    val decimalFormat = DecimalFormat("###,###")
-    return decimalFormat.format(number.toInt())
+fun formatPrice(input: String): String {
+    return try {
+        val number = input.toInt()
+        if (number == 0) {
+            "0"
+        } else {
+            val decimalFormat = DecimalFormat("###,###")
+            decimalFormat.format(number)
+        }
+    } catch (e: NumberFormatException) {
+        "Invalid input"
+    }
 }
