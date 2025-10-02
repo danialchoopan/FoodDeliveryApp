@@ -62,5 +62,8 @@ object RequestEndPoints {
 
     val sellerTotalOrder="$rootDomainApi/seller/orders/total"
 
+    val sellerShowComment="$rootDomainApi/seller/show/comment"
+    val sellerDeleteComment="$rootDomainApi/seller/comment/delete"
+
 
 }

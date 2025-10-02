@@ -19,6 +19,7 @@ import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.DateRange
+import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.ExitToApp
 import androidx.compose.material.icons.filled.Face
 import androidx.compose.material.icons.filled.Home
@@ -139,6 +140,10 @@ fun SellerDashboardScreen(navController: NavHostController) {
                     })
                     MenuItem(icon = Icons.Default.AddCircle, title = "افزودن غذا", onClick = {
                         navController.navigate("seller/add/food")
+                        showBottomSheet = false
+                    })
+                    MenuItem(icon = Icons.Default.Email, title = "نظرات مشتریان", onClick = {
+                        navController.navigate("seller/show/comments")
                         showBottomSheet = false
                     })
                     MenuItem(icon = Icons.Default.DateRange, title = "تاریخچه سفارش", onClick = {

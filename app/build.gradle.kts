@@ -5,7 +5,7 @@ plugins {
 }
 
 android {
-    namespace = "ir.nimaali.nimafooddeliveryapp"
+    namespace = "ir.danialchoopan.nimafooddeliveryapp"
     compileSdk = 35
 
     defaultConfig {
@@ -56,7 +56,6 @@ dependencies {
     // Add ViewModel
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.6.2")
 
-
     // Volley
     implementation("com.android.volley:volley:1.2.1")
 
@@ -68,4 +67,9 @@ dependencies {
 
     //Glide
     implementation("com.github.bumptech.glide:compose:1.0.0-alpha.1")
+
+
+    //Persian Date Picker
+    implementation("com.github.razaghimahdi:Compose-Persian-Date-Picker:1.1.1")
+
 }

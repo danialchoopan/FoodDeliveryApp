@@ -17,6 +17,7 @@ import ir.nimaali.nimafooddeliveryapp.screen.auth.SellerRegisterScreen
 import ir.nimaali.nimafooddeliveryapp.screen.auth.UserLoginScreen
 import ir.nimaali.nimafooddeliveryapp.screen.auth.UserRegisterScreen
 import ir.nimaali.nimafooddeliveryapp.screen.seller.SellerDashboardScreen
+import ir.nimaali.nimafooddeliveryapp.screen.seller.comment.SellerCommentScreen
 import ir.nimaali.nimafooddeliveryapp.screen.seller.edit.EditSellerPasswordScreen
 import ir.nimaali.nimafooddeliveryapp.screen.seller.edit.EditSellerScreen
 import ir.nimaali.nimafooddeliveryapp.screen.seller.edit.SellerEditBannerScreen
@@ -114,6 +115,11 @@ class MainActivity : ComponentActivity() {
                         composable("seller/edit/food/{food_id}") {navBackStackEntry->
                             val food_it=navBackStackEntry.arguments!!.getString("food_id")
                             SellerEditFoodScreen(food_it.toString(),navController)
+                        }
+
+                        //seller comment show
+                        composable("seller/show/comments") {
+                            SellerCommentScreen(navController)
                         }
 
 
