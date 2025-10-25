@@ -13,3 +13,13 @@
 
 ## هدف
 این پروژه برای کسانیه که می‌خوان درک بهتری از ساخت اپلیکیشن‌های اندرویدی با Kotlin و Jetpack Compose پیدا کنن و نمونه‌ای عملی رو بررسی کنن.  
+### Screenshot اسکرین شات
+<img src="1.jpg" height="500">
+<br>
+<img src="2.jpg" height="500">
+<br>
+<img src="3.jpg" height="500">
+<br>
+<img src="4.jpg" height="500">
+<br>
+<img src="5.jpg" height="500">
