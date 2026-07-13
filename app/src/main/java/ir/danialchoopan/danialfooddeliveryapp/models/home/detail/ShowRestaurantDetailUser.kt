@@ -1,4 +1,4 @@
-package ir.nimaali.nimafooddeliveryapp.models.home.detail
+package ir.danialchoopan.danialfooddeliveryapp.models.home.detail
 
 
 import com.google.gson.annotations.SerializedName

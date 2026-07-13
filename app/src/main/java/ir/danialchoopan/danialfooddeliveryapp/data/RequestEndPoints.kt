@@ -1,4 +1,4 @@
-package ir.nimaali.nimafooddeliveryapp.data
+package ir.danialchoopan.danialfooddeliveryapp.data
 
 object RequestEndPoints {
     val rootDomain = "http://192.168.1.11:5000"

@@ -1,14 +1,14 @@
-package ir.nimaali.nimafooddeliveryapp.data.seller
+package ir.danialchoopan.danialfooddeliveryapp.data.seller
 
 
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import com.google.gson.Gson
-import ir.nimaali.nimafooddeliveryapp.data.RequestEndPoints
-import ir.nimaali.nimafooddeliveryapp.data.VolleySingleTon
-import ir.nimaali.nimafooddeliveryapp.models.home.HomePageRestaurant
-import ir.nimaali.nimafooddeliveryapp.models.user.UserSellerRegisterLogin
+import ir.danialchoopan.danialfooddeliveryapp.data.RequestEndPoints
+import ir.danialchoopan.danialfooddeliveryapp.data.VolleySingleTon
+import ir.danialchoopan.danialfooddeliveryapp.models.home.HomePageRestaurant
+import ir.danialchoopan.danialfooddeliveryapp.models.user.UserSellerRegisterLogin
 import org.json.JSONObject
 import java.io.ByteArrayOutputStream
 import java.io.InputStream
@@ -20,8 +20,8 @@ import com.android.volley.toolbox.Volley
 
 
 import android.util.Base64
-import ir.nimaali.nimafooddeliveryapp.models.seller.GetFoodForEdit
-import ir.nimaali.nimafooddeliveryapp.models.seller.SellerFoodsListShow
+import ir.danialchoopan.danialfooddeliveryapp.models.seller.GetFoodForEdit
+import ir.danialchoopan.danialfooddeliveryapp.models.seller.SellerFoodsListShow
 
 
 class SellerFoodRequestGroup(val m_context: Context) {

@@ -1,14 +1,13 @@
-package ir.nimaali.nimafooddeliveryapp.screen.auth
+package ir.danialchoopan.danialfooddeliveryapp.screen.auth
 
 import android.content.Context
 import android.content.SharedPreferences
-import android.provider.CalendarContract.Colors
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -18,25 +17,25 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import ir.nimaali.nimafooddeliveryapp.ui.theme.BackgroundColor
-import ir.nimaali.nimafooddeliveryapp.ui.theme.PrimaryColor
-import ir.nimaali.nimafooddeliveryapp.ui.theme.SurfaceColor
-import ir.nimaali.nimafooddeliveryapp.ui.theme.vazirFontFamily
-import ir.nimaali.nimafooddeliveryapp.viewmodel.AuthUserSellerViewModel
+import ir.danialchoopan.danialfooddeliveryapp.screen.functions.GradientButton
+import ir.danialchoopan.danialfooddeliveryapp.screen.functions.GradientTopBar
+import ir.danialchoopan.danialfooddeliveryapp.ui.theme.BackgroundColor
+import ir.danialchoopan.danialfooddeliveryapp.ui.theme.BorderColor
+import ir.danialchoopan.danialfooddeliveryapp.ui.theme.PrimaryColor
+import ir.danialchoopan.danialfooddeliveryapp.ui.theme.TextPrimary
+import ir.danialchoopan.danialfooddeliveryapp.ui.theme.vazirFontFamily
+import ir.danialchoopan.danialfooddeliveryapp.viewmodel.AuthUserSellerViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun UserRegisterScreen(navController: NavController) {
-    //context
     val m_context = LocalContext.current
 
-    //input
     var userName by remember { mutableStateOf("") }
     var phoneNumber by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
@@ -45,10 +44,8 @@ fun UserRegisterScreen(navController: NavController) {
     var address by remember { mutableStateOf("") }
     var expanded by remember { mutableStateOf(false) }
 
-
     val authUserViewModel: AuthUserSellerViewModel = viewModel()
-    // لیست شهرستان‌های خراسان رضوی
-    var cities = listOf(
+    val cities = listOf(
         "مشهد", "سبزوار", "نیشابور", "تربت حیدریه", "کاشمر", "خواف", "فریمان", "چناران", "کلات"
     )
 
@@ -57,21 +54,7 @@ fun UserRegisterScreen(navController: NavController) {
     Scaffold(
         modifier = Modifier.background(color = BackgroundColor),
         topBar = {
-            TopAppBar(
-                title = {
-                    Text(
-                        "ثبت‌نام کاربر",
-                        style = MaterialTheme.typography.headlineSmall,
-                        fontFamily = vazirFontFamily,
-                        modifier = Modifier.fillMaxWidth(),
-                        textAlign = TextAlign.Center,
-                        color = Color.White
-                    )
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color(0xFF1565C0) // Deep Blue
-                )
-            )
+            GradientTopBar(title = "ثبت‌نام کاربر")
         },
         content = { padding ->
             Column(
@@ -83,13 +66,12 @@ fun UserRegisterScreen(navController: NavController) {
                 verticalArrangement = Arrangement.Top
             ) {
                 Spacer(modifier = Modifier.height(8.dp))
+
                 Text(
                     "ثبت‌نام کاربر جدید",
                     style = MaterialTheme.typography.headlineSmall,
                     fontFamily = vazirFontFamily,
-                    modifier = Modifier.fillMaxWidth(),
-                    textAlign = TextAlign.Right,
-                    color = Color(0xFF03A9F4)
+                    color = PrimaryColor
                 )
 
                 Spacer(modifier = Modifier.height(8.dp))
@@ -97,63 +79,91 @@ fun UserRegisterScreen(navController: NavController) {
                 OutlinedTextField(
                     value = userName,
                     onValueChange = { userName = it },
-                    label = { Text("نام و نام خانوادگی") },
+                    label = { Text("نام و نام خانوادگی", fontFamily = vazirFontFamily) },
                     modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(16.dp),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = PrimaryColor,
+                        unfocusedBorderColor = BorderColor,
+                        cursorColor = PrimaryColor
+                    ),
                     maxLines = 1
                 )
                 Spacer(modifier = Modifier.height(8.dp))
 
-
                 OutlinedTextField(
                     value = phoneNumber,
                     onValueChange = { phoneNumber = it },
-                    label = { Text("شماره تلفن") },
+                    label = { Text("شماره تلفن", fontFamily = vazirFontFamily) },
                     modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(16.dp),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = PrimaryColor,
+                        unfocusedBorderColor = BorderColor,
+                        cursorColor = PrimaryColor
+                    ),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
                     maxLines = 1
                 )
 
-                Spacer(modifier = Modifier.height(10.dp))
+                Spacer(modifier = Modifier.height(8.dp))
 
                 OutlinedTextField(
                     value = password,
                     onValueChange = { password = it },
-                    label = { Text("رمز عبور") },
+                    label = { Text("رمز عبور", fontFamily = vazirFontFamily) },
                     modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(16.dp),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = PrimaryColor,
+                        unfocusedBorderColor = BorderColor,
+                        cursorColor = PrimaryColor
+                    ),
                     visualTransformation = PasswordVisualTransformation(),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
                     maxLines = 1
                 )
 
-                Spacer(modifier = Modifier.height(10.dp))
+                Spacer(modifier = Modifier.height(8.dp))
 
                 OutlinedTextField(
                     value = confirmPassword,
                     onValueChange = { confirmPassword = it },
-                    label = { Text("تکرار رمز عبور") },
+                    label = { Text("تکرار رمز عبور", fontFamily = vazirFontFamily) },
                     modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(16.dp),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = PrimaryColor,
+                        unfocusedBorderColor = BorderColor,
+                        cursorColor = PrimaryColor
+                    ),
                     visualTransformation = PasswordVisualTransformation(),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
                     maxLines = 1
                 )
 
-                Spacer(modifier = Modifier.height(10.dp))
+                Spacer(modifier = Modifier.height(8.dp))
 
-                // مقداردهی اولیه متغیر selectedCity با مقدار پیش‌فرض
-                var selectedCity by remember { mutableStateOf(cities[0]) } // "مشهد" به عنوان مقدار پیش‌فرض
+                var selectedCity by remember { mutableStateOf(cities[0]) }
 
                 ExposedDropdownMenuBox(
                     expanded = expanded,
                     onExpandedChange = { expanded = !expanded }
                 ) {
                     OutlinedTextField(
-                        value = selectedCity, // مقدار فعلی انتخاب شده
-                        onValueChange = {}, // به‌روزرسانی مستقیم نیازی نیست
-                        label = { Text("شهر") },
-                        readOnly = true, // این فیلد فقط خواندنی است
+                        value = selectedCity,
+                        onValueChange = {},
+                        label = { Text("شهر", fontFamily = vazirFontFamily) },
+                        readOnly = true,
                         modifier = Modifier
                             .menuAnchor()
                             .fillMaxWidth(),
+                        shape = RoundedCornerShape(16.dp),
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedBorderColor = PrimaryColor,
+                            unfocusedBorderColor = BorderColor,
+                            cursorColor = PrimaryColor
+                        ),
                         trailingIcon = {
                             Icon(Icons.Default.ArrowDropDown, contentDescription = null)
                         }
@@ -165,33 +175,37 @@ fun UserRegisterScreen(navController: NavController) {
                         cities.forEach { city ->
                             DropdownMenuItem(
                                 onClick = {
-                                    selectedCity = city // انتخاب شهر جدید
-                                    expanded = false // بستن منو
+                                    selectedCity = city
+                                    expanded = false
                                 },
-                                text = { Text(city) }
+                                text = { Text(city, fontFamily = vazirFontFamily) }
                             )
                         }
                     }
                 }
 
+                Spacer(modifier = Modifier.height(8.dp))
 
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                // فیلد آدرس
                 OutlinedTextField(
                     value = address,
                     onValueChange = { address = it },
-                    label = { Text("آدرس") },
+                    label = { Text("آدرس", fontFamily = vazirFontFamily) },
                     modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(16.dp),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = PrimaryColor,
+                        unfocusedBorderColor = BorderColor,
+                        cursorColor = PrimaryColor
+                    ),
                     keyboardOptions = KeyboardOptions.Default,
                     maxLines = 1
                 )
 
                 Spacer(modifier = Modifier.height(16.dp))
-                Button(
+
+                GradientButton(
+                    text = "ثبت‌نام",
                     onClick = {
-//                        // تابع ثبت‌نام کاربر
                         if (password == confirmPassword) {
                             authUserViewModel.userRegisterRequest(
                                 m_context,
@@ -200,34 +214,27 @@ fun UserRegisterScreen(navController: NavController) {
                                 selectedCity,
                                 address,
                                 password
-                            ) {success->
-                                if(success){
-                                    navController.navigate("home_user"){
+                            ) { success ->
+                                if (success) {
+                                    navController.navigate("home_user") {
                                         popUpTo(0)
                                     }
-                                }else{
+                                } else {
                                     errorMessage = "مشکلی پیش آمده است لطفا بعدا امتحان کنید"
                                 }
                             }
                         } else {
                             errorMessage = "رمز عبور و تکرار رمز عبور یکسان نیستند."
                         }
-                    },
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text(
-                        "ثبت‌نام",
-                        fontFamily = vazirFontFamily,
-                        style = MaterialTheme.typography.headlineSmall
-                    )
-                }
+                    }
+                )
 
                 if (errorMessage.isNotEmpty()) {
                     Spacer(modifier = Modifier.height(8.dp))
-                    Text(errorMessage, color = MaterialTheme.colorScheme.error)
+                    Text(errorMessage, color = MaterialTheme.colorScheme.error, fontFamily = vazirFontFamily)
                 }
 
-                Spacer(modifier = Modifier.height(18.dp))
+                Spacer(modifier = Modifier.height(8.dp))
 
                 TextButton(onClick = {
                     navController.navigate("user_login")

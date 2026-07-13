@@ -1,4 +1,4 @@
-package ir.nimaali.nimafooddeliveryapp.data
+package ir.danialchoopan.danialfooddeliveryapp.data
 
 import android.content.Context
 import com.android.volley.Request

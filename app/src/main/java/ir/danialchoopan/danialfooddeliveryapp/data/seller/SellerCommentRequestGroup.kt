@@ -1,13 +1,13 @@
-package ir.nimaali.nimafooddeliveryapp.data.seller
+package ir.danialchoopan.danialfooddeliveryapp.data.seller
 
 import android.content.Context
 import com.android.volley.Response
 import com.android.volley.toolbox.JsonObjectRequest
 import com.google.gson.Gson
-import ir.nimaali.nimafooddeliveryapp.data.RequestEndPoints
-import ir.nimaali.nimafooddeliveryapp.data.VolleySingleTon
-import ir.nimaali.nimafooddeliveryapp.models.seller.SellerFoodsListShow
-import ir.nimaali.nimafooddeliveryapp.models.seller.comment.SellerCommentShow
+import ir.danialchoopan.danialfooddeliveryapp.data.RequestEndPoints
+import ir.danialchoopan.danialfooddeliveryapp.data.VolleySingleTon
+import ir.danialchoopan.danialfooddeliveryapp.models.seller.SellerFoodsListShow
+import ir.danialchoopan.danialfooddeliveryapp.models.seller.comment.SellerCommentShow
 import org.json.JSONObject
 
 class SellerCommentRequestGroup(val m_context: Context)  {

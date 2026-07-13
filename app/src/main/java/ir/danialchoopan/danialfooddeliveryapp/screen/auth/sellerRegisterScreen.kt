@@ -1,15 +1,14 @@
-package ir.nimaali.nimafooddeliveryapp.screen.auth
+package ir.danialchoopan.danialfooddeliveryapp.screen.auth
 
 
 import android.content.Context
 import android.content.SharedPreferences
-import android.provider.CalendarContract.Colors
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -19,15 +18,17 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import ir.nimaali.nimafooddeliveryapp.ui.theme.BackgroundColor
-import ir.nimaali.nimafooddeliveryapp.ui.theme.PrimaryColor
-import ir.nimaali.nimafooddeliveryapp.ui.theme.SurfaceColor
-import ir.nimaali.nimafooddeliveryapp.ui.theme.vazirFontFamily
-import ir.nimaali.nimafooddeliveryapp.viewmodel.AuthUserSellerViewModel
+import ir.danialchoopan.danialfooddeliveryapp.screen.functions.GradientButton
+import ir.danialchoopan.danialfooddeliveryapp.screen.functions.GradientTopBar
+import ir.danialchoopan.danialfooddeliveryapp.ui.theme.BackgroundColor
+import ir.danialchoopan.danialfooddeliveryapp.ui.theme.BorderColor
+import ir.danialchoopan.danialfooddeliveryapp.ui.theme.PrimaryColor
+import ir.danialchoopan.danialfooddeliveryapp.ui.theme.TextPrimary
+import ir.danialchoopan.danialfooddeliveryapp.ui.theme.vazirFontFamily
+import ir.danialchoopan.danialfooddeliveryapp.viewmodel.AuthUserSellerViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
@@ -40,39 +41,22 @@ fun SellerRegisterScreen(navController: NavController) {
     var password by remember { mutableStateOf("") }
     var confirmPassword by remember { mutableStateOf("") }
     var address by remember { mutableStateOf("") }
-    var selectedCity by remember { mutableStateOf("مشهد") } // مقدار پیش‌فرض
+    var selectedCity by remember { mutableStateOf("مشهد") }
     var selectedCategory by remember { mutableStateOf<String?>(null) }
     var expandedCity by remember { mutableStateOf(false) }
     var expandedCategory by remember { mutableStateOf(false) }
     var errorMessage by remember { mutableStateOf("") }
 
-    // لیست شهرستان‌ها و دسته‌بندی‌ها
     val cities = listOf("مشهد", "سبزوار", "نیشابور", "تربت حیدریه", "کاشمر")
     val categories = listOf("رستوران", "فست‌فود", "کافه", "شیرینی‌فروشی")
 
-
-    //auth
     val authUserViewModel: AuthUserSellerViewModel = viewModel()
-
-    //context
-    val m_context= LocalContext.current
+    val m_context = LocalContext.current
 
     Scaffold(
         modifier = Modifier.background(color = BackgroundColor),
         topBar = {
-            TopAppBar(
-                title = {
-                    Text(
-                        "ثبت‌نام فروشنده",
-                        style = MaterialTheme.typography.headlineSmall,
-                        fontFamily = vazirFontFamily,
-                        modifier = Modifier.fillMaxWidth(),
-                        textAlign = TextAlign.Center,
-                        color = Color.White
-                    )
-                },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color(0xFF1565C0))
-            )
+            GradientTopBar(title = "ثبت‌نام فروشنده")
         },
         content = { padding ->
             Column(
@@ -86,28 +70,30 @@ fun SellerRegisterScreen(navController: NavController) {
                 OutlinedTextField(
                     value = restaurantName,
                     onValueChange = { restaurantName = it },
-                    label = { Text("نام رستوران") },
+                    label = { Text("نام رستوران", fontFamily = vazirFontFamily) },
                     modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(16.dp),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = PrimaryColor,
+                        unfocusedBorderColor = BorderColor,
+                        cursorColor = PrimaryColor
+                    ),
                     maxLines = 1
                 )
 
                 Spacer(modifier = Modifier.height(8.dp))
 
-//                OutlinedTextField(
-//                    value = sellerName,
-//                    onValueChange = { sellerName = it },
-//                    label = { Text("نام فروشنده") },
-//                    modifier = Modifier.fillMaxWidth(),
-//                    maxLines = 1
-//                )
-//
-//                Spacer(modifier = Modifier.height(8.dp))
-
                 OutlinedTextField(
                     value = phone,
                     onValueChange = { phone = it },
-                    label = { Text("شماره تلفن") },
+                    label = { Text("شماره تلفن", fontFamily = vazirFontFamily) },
                     modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(16.dp),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = PrimaryColor,
+                        unfocusedBorderColor = BorderColor,
+                        cursorColor = PrimaryColor
+                    ),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
                     maxLines = 1
                 )
@@ -117,8 +103,14 @@ fun SellerRegisterScreen(navController: NavController) {
                 OutlinedTextField(
                     value = password,
                     onValueChange = { password = it },
-                    label = { Text("رمز عبور") },
+                    label = { Text("رمز عبور", fontFamily = vazirFontFamily) },
                     modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(16.dp),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = PrimaryColor,
+                        unfocusedBorderColor = BorderColor,
+                        cursorColor = PrimaryColor
+                    ),
                     visualTransformation = PasswordVisualTransformation(),
                     maxLines = 1
                 )
@@ -128,15 +120,20 @@ fun SellerRegisterScreen(navController: NavController) {
                 OutlinedTextField(
                     value = confirmPassword,
                     onValueChange = { confirmPassword = it },
-                    label = { Text("تکرار رمز عبور") },
+                    label = { Text("تکرار رمز عبور", fontFamily = vazirFontFamily) },
                     modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(16.dp),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = PrimaryColor,
+                        unfocusedBorderColor = BorderColor,
+                        cursorColor = PrimaryColor
+                    ),
                     visualTransformation = PasswordVisualTransformation(),
                     maxLines = 1
                 )
 
                 Spacer(modifier = Modifier.height(8.dp))
 
-                // انتخاب شهر
                 ExposedDropdownMenuBox(
                     expanded = expandedCity,
                     onExpandedChange = { expandedCity = !expandedCity }
@@ -144,9 +141,15 @@ fun SellerRegisterScreen(navController: NavController) {
                     OutlinedTextField(
                         value = selectedCity,
                         onValueChange = {},
-                        label = { Text("شهر") },
+                        label = { Text("شهر", fontFamily = vazirFontFamily) },
                         readOnly = true,
                         modifier = Modifier.menuAnchor().fillMaxWidth(),
+                        shape = RoundedCornerShape(16.dp),
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedBorderColor = PrimaryColor,
+                            unfocusedBorderColor = BorderColor,
+                            cursorColor = PrimaryColor
+                        ),
                         trailingIcon = {
                             Icon(Icons.Default.ArrowDropDown, contentDescription = null)
                         }
@@ -161,7 +164,7 @@ fun SellerRegisterScreen(navController: NavController) {
                                     selectedCity = city
                                     expandedCity = false
                                 },
-                                text = { Text(city) }
+                                text = { Text(city, fontFamily = vazirFontFamily) }
                             )
                         }
                     }
@@ -169,7 +172,6 @@ fun SellerRegisterScreen(navController: NavController) {
 
                 Spacer(modifier = Modifier.height(8.dp))
 
-                // انتخاب دسته‌بندی
                 ExposedDropdownMenuBox(
                     expanded = expandedCategory,
                     onExpandedChange = { expandedCategory = !expandedCategory }
@@ -177,9 +179,15 @@ fun SellerRegisterScreen(navController: NavController) {
                     OutlinedTextField(
                         value = selectedCategory ?: "انتخاب دسته‌بندی",
                         onValueChange = {},
-                        label = { Text("دسته‌بندی") },
+                        label = { Text("دسته‌بندی", fontFamily = vazirFontFamily) },
                         readOnly = true,
                         modifier = Modifier.menuAnchor().fillMaxWidth(),
+                        shape = RoundedCornerShape(16.dp),
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedBorderColor = PrimaryColor,
+                            unfocusedBorderColor = BorderColor,
+                            cursorColor = PrimaryColor
+                        ),
                         trailingIcon = {
                             Icon(Icons.Default.ArrowDropDown, contentDescription = null)
                         }
@@ -194,7 +202,7 @@ fun SellerRegisterScreen(navController: NavController) {
                                     selectedCategory = category
                                     expandedCategory = false
                                 },
-                                text = { Text(category) }
+                                text = { Text(category, fontFamily = vazirFontFamily) }
                             )
                         }
                     }
@@ -205,43 +213,47 @@ fun SellerRegisterScreen(navController: NavController) {
                 OutlinedTextField(
                     value = address,
                     onValueChange = { address = it },
-                    label = { Text("آدرس") },
+                    label = { Text("آدرس", fontFamily = vazirFontFamily) },
                     modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(16.dp),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = PrimaryColor,
+                        unfocusedBorderColor = BorderColor,
+                        cursorColor = PrimaryColor
+                    ),
                     maxLines = 1
                 )
 
                 Spacer(modifier = Modifier.height(8.dp))
 
-                Button(
+                GradientButton(
+                    text = "ثبت‌نام",
                     onClick = {
                         if (password == confirmPassword && selectedCategory != null) {
                             authUserViewModel.sellerRegisterRequest(
                                 m_context,
                                 restaurantName,
-                                selectedCategory!!,phone,selectedCity,address,password
-                            ) {success->
-                                if(success){
-                                    navController.navigate("dashboard_seller"){
+                                selectedCategory!!, phone, selectedCity, address, password
+                            ) { success ->
+                                if (success) {
+                                    navController.navigate("dashboard_seller") {
                                         popUpTo(0)
                                     }
-                                }else{
+                                } else {
                                     errorMessage = "مشکلی پیش آمده است لطفا بعدا امتحان کنید"
                                 }
                             }
                         } else {
                             errorMessage = "لطفاً تمامی فیلدها را به درستی پر کنید."
                         }
-                    },
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text("ثبت‌نام", fontFamily = vazirFontFamily, style = MaterialTheme.typography.headlineSmall)
-                }
+                    }
+                )
 
                 if (errorMessage.isNotEmpty()) {
                     Spacer(modifier = Modifier.height(8.dp))
-                    Text(errorMessage, color = MaterialTheme.colorScheme.error)
+                    Text(errorMessage, color = MaterialTheme.colorScheme.error, fontFamily = vazirFontFamily)
                 }
-                Spacer(modifier = Modifier.height(10.dp))
+                Spacer(modifier = Modifier.height(8.dp))
                 TextButton(onClick = {
                     navController.navigate("seller_login")
                 }) {

@@ -1,15 +1,13 @@
-package ir.nimaali.nimafooddeliveryapp.screen.user.order
+package ir.danialchoopan.danialfooddeliveryapp.screen.user.order
 
 import android.content.Context
 import android.content.SharedPreferences
-import android.provider.CalendarContract.Colors
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
@@ -37,16 +35,12 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
-import ir.nimaali.nimafooddeliveryapp.data.home.HomeRestaurantOderRequestGroup
-import ir.nimaali.nimafooddeliveryapp.data.user.UserAuthRequestGroup
-import ir.nimaali.nimafooddeliveryapp.models.home.Restaurant
-import ir.nimaali.nimafooddeliveryapp.models.home.order.OrderListUsersAllItem
-import ir.nimaali.nimafooddeliveryapp.screen.functions.LoadingProgressbar
-import ir.nimaali.nimafooddeliveryapp.ui.theme.BackgroundColor
-import ir.nimaali.nimafooddeliveryapp.ui.theme.PrimaryColor
-import ir.nimaali.nimafooddeliveryapp.ui.theme.SurfaceColor
-import ir.nimaali.nimafooddeliveryapp.ui.theme.vazirFontFamily
-import ir.nimaali.nimafooddeliveryapp.viewmodel.AuthUserSellerViewModel
+import ir.danialchoopan.danialfooddeliveryapp.data.home.HomeRestaurantOderRequestGroup
+import ir.danialchoopan.danialfooddeliveryapp.models.home.Restaurant
+import ir.danialchoopan.danialfooddeliveryapp.models.home.order.OrderListUsersAllItem
+import ir.danialchoopan.danialfooddeliveryapp.screen.functions.*
+import ir.danialchoopan.danialfooddeliveryapp.ui.theme.*
+import ir.danialchoopan.danialfooddeliveryapp.viewmodel.AuthUserSellerViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
@@ -70,19 +64,10 @@ fun UserOrdersAllScreen(navController: NavController) {
     }
 
     Scaffold(
+        containerColor = BackgroundColor,
         topBar = {
-            TopAppBar(
-                title = {
-                    Text(
-                        "نمایش تمام سفارش های کاربر",
-                        style = MaterialTheme.typography.headlineSmall,
-                        fontFamily = vazirFontFamily,
-                        modifier = Modifier.fillMaxWidth(),
-                        textAlign = TextAlign.Center,
-                        color = Color.White
-                    )
-                },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color(0xFF4CAF50)),
+            GradientTopBar(
+                title = "نمایش تمام سفارش های کاربر",
                 actions = {
                     IconButton(onClick = { navController.popBackStack() }) {
                         Icon(
@@ -102,13 +87,7 @@ fun UserOrdersAllScreen(navController: NavController) {
             }
         } else {
             if (listOrders.isEmpty()) {
-                Column(
-                    modifier = Modifier.fillMaxSize(),
-                    verticalArrangement = Arrangement.Center,
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Text("شما تا به حال سفارشی ثبت نکرده اید !")
-                }
+                EmptyState(message = "شما تا به حال سفارشی ثبت نکرده اید !")
             }
             Box(
                 modifier = Modifier
@@ -118,48 +97,39 @@ fun UserOrdersAllScreen(navController: NavController) {
             ) {
                 LazyColumn {
                     items(listOrders) { order ->
-                        Card(
+                        ModernCard(
                             modifier = Modifier
                                 .padding(8.dp)
-                                .fillMaxWidth(),
-                            elevation = CardDefaults.cardElevation(4.dp)
+                                .fillMaxWidth()
                         ) {
                             Column(modifier = Modifier.padding(16.dp)) {
-                                Text(
-                                    "وضعیت سفارش: ${order.status} ",
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    color = if (order.status == "تایید شده") Color.DarkGray else Color.Red
-                                )
-                                Spacer(modifier = Modifier.height(8.dp))
-                                Text(
-                                    " نام رستوران : " + order.seller_name,
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    fontFamily = vazirFontFamily
-                                )
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    modifier = Modifier.fillMaxWidth()
+                                ) {
+                                    Text(
+                                        "نام رستوران : " + order.seller_name,
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        fontFamily = vazirFontFamily,
+                                        color = TextPrimary
+                                    )
+                                    StatusChip(status = order.status)
+                                }
                                 Spacer(modifier = Modifier.height(8.dp))
                                 Text(
                                     "زمان سفارش: ${order.orderDate}",
                                     style = MaterialTheme.typography.bodyMedium,
-                                    fontFamily = vazirFontFamily
+                                    fontFamily = vazirFontFamily,
+                                    color = TextSecondary
                                 )
-                                Spacer(modifier = Modifier.height(8.dp))
-                                Spacer(modifier = Modifier.height(8.dp))
-                                Row(
-                                    horizontalArrangement = Arrangement.Center,
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    modifier = Modifier.fillMaxSize()
-                                ) {
-                                    Button(
-                                        onClick = {
-                                            navController.navigate("user/order/" + order.id)
-                                        },
-                                        colors = ButtonDefaults.buttonColors(containerColor = Color.Blue)
-                                    ) {
-                                        Text(
-                                            "جزئیات سفارش", fontFamily = vazirFontFamily
-                                        )
+                                Spacer(modifier = Modifier.height(12.dp))
+                                GradientButton(
+                                    text = "جزئیات سفارش",
+                                    onClick = {
+                                        navController.navigate("user/order/" + order.id)
                                     }
-                                }
+                                )
                             }
                         }
                     }

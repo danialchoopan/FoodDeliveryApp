@@ -1,9 +1,7 @@
-package ir.nimaali.nimafooddeliveryapp.screen.user.order
+package ir.danialchoopan.danialfooddeliveryapp.screen.user.order
 
 import android.content.Context
 import android.content.SharedPreferences
-import android.provider.CalendarContract.Colors
-import android.view.MenuItem
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -35,6 +33,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
@@ -44,15 +43,13 @@ import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
-import ir.nimaali.nimafooddeliveryapp.data.RequestEndPoints
-import ir.nimaali.nimafooddeliveryapp.data.home.HomeRestaurantOderRequestGroup
-import ir.nimaali.nimafooddeliveryapp.formatPrice
-import ir.nimaali.nimafooddeliveryapp.models.home.detail.Food
-import ir.nimaali.nimafooddeliveryapp.models.user.order.Detail
-import ir.nimaali.nimafooddeliveryapp.ui.theme.BackgroundColor
-import ir.nimaali.nimafooddeliveryapp.ui.theme.PrimaryColor
-import ir.nimaali.nimafooddeliveryapp.ui.theme.SurfaceColor
-import ir.nimaali.nimafooddeliveryapp.ui.theme.vazirFontFamily
+import ir.danialchoopan.danialfooddeliveryapp.data.RequestEndPoints
+import ir.danialchoopan.danialfooddeliveryapp.data.home.HomeRestaurantOderRequestGroup
+import ir.danialchoopan.danialfooddeliveryapp.formatPrice
+import ir.danialchoopan.danialfooddeliveryapp.models.home.detail.Food
+import ir.danialchoopan.danialfooddeliveryapp.models.user.order.Detail
+import ir.danialchoopan.danialfooddeliveryapp.screen.functions.*
+import ir.danialchoopan.danialfooddeliveryapp.ui.theme.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
@@ -83,27 +80,17 @@ fun UserOrderDetailScreen(
     }
 
     homeRestaurantOderRequestGroup.getUserOrderDetailByID(order_id) {
-        status_order=it.status
-        date_order=it.orderDate
+        status_order = it.status
+        date_order = it.orderDate
         listFoods = it.details
-        seller_name=it.seller_name
-        total_price=it.total_items.toString()
+        seller_name = it.seller_name
+        total_price = it.total_items.toString()
     }
     Scaffold(
+        containerColor = BackgroundColor,
         topBar = {
-            TopAppBar(
-                title = {
-                    Text(
-                        "جزئیات سفارش",
-                        style = MaterialTheme.typography.headlineSmall,
-                        fontFamily = vazirFontFamily,
-                        textAlign = TextAlign.Center,
-                        color = Color.White,
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color(0xFF4CAF50)),
-
+            GradientTopBar(
+                title = "جزئیات سفارش",
                 actions = {
                     IconButton(onClick = { navController.popBackStack() }) {
                         Icon(
@@ -123,73 +110,92 @@ fun UserOrderDetailScreen(
                 .padding(padding)
                 .padding(16.dp)
         ) {
-            Text(
-                "نام رستوران: "+seller_name,
-                style = MaterialTheme.typography.bodyLarge,
-                fontFamily = vazirFontFamily
-            )
-            Spacer(modifier = Modifier.height(8.dp))
+            // Order Info Card
+            ModernCard(modifier = Modifier.fillMaxWidth()) {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text(
+                            "نام رستوران: $seller_name",
+                            style = MaterialTheme.typography.bodyLarge,
+                            fontFamily = vazirFontFamily,
+                            color = TextPrimary
+                        )
+                        StatusChip(status = status_order)
+                    }
+                    Spacer(modifier = Modifier.height(8.dp))
 
-            Text(
-                "وضعیت سفارش: "+status_order,
-                style = MaterialTheme.typography.bodyMedium
-            )
-            Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        "زمان سفارش: $date_order",
+                        style = MaterialTheme.typography.bodyMedium,
+                        fontFamily = vazirFontFamily,
+                        color = TextSecondary
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
 
-            Text(
-                "زمان سفارش: "+date_order,
-                style = MaterialTheme.typography.bodyMedium,
-                fontFamily = vazirFontFamily
-            )
+                    Text(
+                        "مجموع: ${formatPrice(total_price)}",
+                        style = MaterialTheme.typography.bodyMedium,
+                        fontFamily = vazirFontFamily,
+                        color = PrimaryColor,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+            }
+
             Spacer(modifier = Modifier.height(16.dp))
-
-            Text(
-                "مجموع: "+ formatPrice(total_price),
-                style = MaterialTheme.typography.bodyMedium,
-                fontFamily = vazirFontFamily
-            )
-            Spacer(modifier = Modifier.height(8.dp))
 
             Text(
                 "لیست غذاها:",
                 style = MaterialTheme.typography.bodyLarge,
-                fontFamily = vazirFontFamily
+                fontFamily = vazirFontFamily,
+                color = TextPrimary
             )
             Spacer(modifier = Modifier.height(8.dp))
 
             LazyColumn {
                 items(listFoods) { food ->
-
-                    Row(
+                    Card(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .background(Color(0xFFF5F5F5), RoundedCornerShape(8.dp))
-                            .padding(8.dp),
-                        verticalAlignment = Alignment.CenterVertically
+                            .padding(vertical = 4.dp),
+                        shape = RoundedCornerShape(12.dp),
+                        colors = CardDefaults.cardColors(containerColor = CardSurface),
+                        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
                     ) {
-                        // تصویر غذا
-                        GlideImage(
-                            model = RequestEndPoints.rootDomain + "/" + food.foodImg,
-                            contentDescription = "",
+                        Row(
                             modifier = Modifier
-                                .size(64.dp)
-                                .clip(RoundedCornerShape(8.dp)),
-                            contentScale = ContentScale.Crop
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
+                                .fillMaxWidth()
+                                .padding(8.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            GlideImage(
+                                model = RequestEndPoints.rootDomain + "/" + food.foodImg,
+                                contentDescription = "",
+                                modifier = Modifier
+                                    .size(64.dp)
+                                    .clip(RoundedCornerShape(12.dp)),
+                                contentScale = ContentScale.Crop
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
 
-                        // اطلاعات غذا
-                        Column(modifier = Modifier.weight(1f)) {
-                            Text(
-                                text = food.foodName,
-                                style = MaterialTheme.typography.bodyLarge,
-                                color = Color.Black
-                            )
-                            Text(
-                                text = "${formatPrice(food.price.toString())}  تومان",
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = Color(0xFF4CAF50)
-                            )
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(
+                                    text = food.foodName,
+                                    style = MaterialTheme.typography.bodyLarge,
+                                    color = TextPrimary,
+                                    fontFamily = vazirFontFamily
+                                )
+                                Text(
+                                    text = "${formatPrice(food.price.toString())}  تومان",
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = PrimaryColor,
+                                    fontWeight = FontWeight.Bold
+                                )
+                            }
                         }
                     }
                 }
@@ -201,23 +207,19 @@ fun UserOrderDetailScreen(
                 horizontalArrangement = Arrangement.SpaceEvenly,
                 modifier = Modifier.fillMaxWidth()
             ) {
-                if (status_order!="لغو شده") {
-                    Button(
+                if (status_order != "لغو شده") {
+                    GradientButton(
+                        text = "لغو سفارش",
                         onClick = {
-                            homeRestaurantOderRequestGroup.setOrderCancelByUser(order_id){
-                                navController.navigate("home_user"){
+                            homeRestaurantOderRequestGroup.setOrderCancelByUser(order_id) {
+                                navController.navigate("home_user") {
                                     popUpTo(0)
                                 }
                             }
                         },
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = Color.Red
-                        )
-                    ) {
-                        Text("لغو سفارش", fontFamily = vazirFontFamily)
-                    }
+                        modifier = Modifier.padding(horizontal = 32.dp)
+                    )
                 }
-
             }
         }
     }

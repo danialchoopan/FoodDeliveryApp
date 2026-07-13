@@ -1,69 +1,34 @@
-package ir.nimaali.nimafooddeliveryapp.screen.seller.order
+package ir.danialchoopan.danialfooddeliveryapp.screen.seller.order
 
-
-import android.annotation.SuppressLint
-import android.app.Activity
-import android.content.Context
-import android.content.Intent
-import android.content.SharedPreferences
-import android.net.Uri
-import android.provider.CalendarContract.Colors
-import android.view.MenuItem
 import android.widget.Toast
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AddCircle
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.ArrowDropDown
-import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.ExitToApp
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.List
-import androidx.compose.material.icons.filled.Menu
-import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.NavController
 import androidx.navigation.NavHostController
-import ir.nimaali.nimafooddeliveryapp.data.seller.SellerHomeRequestGroup
-import ir.nimaali.nimafooddeliveryapp.formatPrice
-import ir.nimaali.nimafooddeliveryapp.screen.functions.LoadingProgressbar
-import ir.nimaali.nimafooddeliveryapp.ui.theme.BackgroundColor
-import ir.nimaali.nimafooddeliveryapp.ui.theme.PrimaryColor
-import ir.nimaali.nimafooddeliveryapp.ui.theme.SurfaceColor
-import ir.nimaali.nimafooddeliveryapp.ui.theme.vazirFontFamily
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
+import ir.danialchoopan.danialfooddeliveryapp.data.seller.SellerHomeRequestGroup
+import ir.danialchoopan.danialfooddeliveryapp.formatPrice
+import ir.danialchoopan.danialfooddeliveryapp.screen.functions.*
+import ir.danialchoopan.danialfooddeliveryapp.ui.theme.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SellerMonthlyIncomeScreen(navHostController: NavHostController) {
 
-    val m_context = LocalContext.current
+    val m_context = androidx.compose.ui.platform.LocalContext.current
 
     val sellerHomeRequestGroup = SellerHomeRequestGroup(m_context)
-    // درآمد ماهانه
     var monthlyIncome by remember {
         mutableStateOf("")
     }
@@ -89,8 +54,6 @@ fun SellerMonthlyIncomeScreen(navHostController: NavHostController) {
 
     }
 
-
-    // نمایش دیالوگ تسویه حساب
     var showDialog by remember { mutableStateOf(false) }
 
     if (showDialog) {
@@ -132,26 +95,17 @@ fun SellerMonthlyIncomeScreen(navHostController: NavHostController) {
     }
 
     Scaffold(
+        containerColor = BackgroundColor,
         topBar = {
-            TopAppBar(
-                title = {
-                    Text(
-                        "درآمد ماهانه",
-                        style = MaterialTheme.typography.headlineSmall,
-                        fontFamily = vazirFontFamily,
-                        modifier = Modifier.fillMaxWidth(),
-                        textAlign = TextAlign.Center,
-                        color = Color.White
-                    )
-                },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color(0xFF4CAF50)),
+            GradientTopBar(
+                title = "درآمد ماهانه",
                 actions = {
                     IconButton(onClick = { navHostController.popBackStack() }) {
                         Icon(
                             Icons.Default.Close,
                             contentDescription = "برگشت",
                             modifier = Modifier.size(42.dp),
-                            tint = Color.White
+                            tint = MaterialTheme.colorScheme.onPrimary
                         )
                     }
                 }
@@ -172,59 +126,95 @@ fun SellerMonthlyIncomeScreen(navHostController: NavHostController) {
                         .fillMaxSize(),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    // نمایش پیام درآمد ماهانه
-                    Text(
-                        "درآمد ماهانه",
-                        fontFamily = vazirFontFamily,
-                        style = TextStyle(
-                            fontSize = 18.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = Color.Black.copy(alpha = 0.87f)
-                        )
-                    )
-                    Spacer(modifier = Modifier.height(12.dp))
-
-                    Text(
-                        "${formatPrice(monthlyIncome)} تومان",
-                        style = TextStyle(
-                            fontSize = 20.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = Color(0xFF013220)
-                        ),
-                        fontFamily = vazirFontFamily
-                    )
-                    Divider(modifier = Modifier.padding(vertical = 24.dp), color = Color.Gray)
-
-                    // تعداد سفارش‌های موفق
-                    Text(
-                        "تعداد سفارش‌های موفق: $successfulOrders",
-                        style = TextStyle(
-                            fontSize = 16.sp, color = Color(0xFF013220),
-                            fontFamily = vazirFontFamily
-                        )
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-
-                    // تعداد سفارش‌های ناموفق
-                    Text(
-                        "تعداد سفارش‌های ناموفق: $failedOrders",
-                        fontFamily = vazirFontFamily,
-                        style = TextStyle(fontSize = 16.sp, color = Color.Red.copy(alpha = 0.7f))
-                    )
-                    Divider(modifier = Modifier.padding(vertical = 24.dp), color = Color.Gray)
-
-                    // دکمه تسویه حساب اگر درآمد بیشتر از 100,000 تومان باشد
-                    if (monthlyIncome.toInt() > 100000) {
-                        Button(
-                            onClick = { showDialog = true },
-                            modifier = Modifier.fillMaxWidth()
-                        ) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .background(
+                                brush = GradientPrimary,
+                                shape = RoundedCornerShape(16.dp)
+                            )
+                            .padding(24.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
                             Text(
-                                "تسویه حساب",
-                                style = MaterialTheme.typography.titleMedium,
+                                "درآمد ماهانه",
                                 fontFamily = vazirFontFamily,
+                                style = TextStyle(
+                                    fontSize = 18.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color.White.copy(alpha = 0.9f)
+                                )
+                            )
+                            Spacer(modifier = Modifier.height(12.dp))
+                            Text(
+                                "${formatPrice(monthlyIncome)} تومان",
+                                style = TextStyle(
+                                    fontSize = 24.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color.White
+                                ),
+                                fontFamily = vazirFontFamily
                             )
                         }
+                    }
+
+                    Spacer(modifier = Modifier.height(24.dp))
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        ModernCard(
+                            modifier = Modifier.weight(1f)
+                        ) {
+                            Column(
+                                modifier = Modifier.padding(16.dp),
+                                horizontalAlignment = Alignment.CenterHorizontally
+                            ) {
+                                Text(
+                                    "سفارش‌های موفق",
+                                    fontFamily = vazirFontFamily,
+                                    style = TextStyle(fontSize = 14.sp, color = TextSecondary)
+                                )
+                                Spacer(modifier = Modifier.height(4.dp))
+                                Text(
+                                    "$successfulOrders",
+                                    fontFamily = vazirFontFamily,
+                                    style = TextStyle(fontSize = 20.sp, fontWeight = FontWeight.Bold, color = SuccessColor)
+                                )
+                            }
+                        }
+                        ModernCard(
+                            modifier = Modifier.weight(1f)
+                        ) {
+                            Column(
+                                modifier = Modifier.padding(16.dp),
+                                horizontalAlignment = Alignment.CenterHorizontally
+                            ) {
+                                Text(
+                                    "سفارش‌های ناموفق",
+                                    fontFamily = vazirFontFamily,
+                                    style = TextStyle(fontSize = 14.sp, color = TextSecondary)
+                                )
+                                Spacer(modifier = Modifier.height(4.dp))
+                                Text(
+                                    "$failedOrders",
+                                    fontFamily = vazirFontFamily,
+                                    style = TextStyle(fontSize = 20.sp, fontWeight = FontWeight.Bold, color = ErrorColor)
+                                )
+                            }
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(24.dp))
+
+                    if (monthlyIncome.toInt() > 100000) {
+                        GradientButton(
+                            text = "تسویه حساب",
+                            onClick = { showDialog = true },
+                            modifier = Modifier.fillMaxWidth()
+                        )
                     }
                 }
             }

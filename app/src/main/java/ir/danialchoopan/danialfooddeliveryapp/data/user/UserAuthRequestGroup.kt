@@ -1,4 +1,4 @@
-package ir.nimaali.nimafooddeliveryapp.data.user
+package ir.danialchoopan.danialfooddeliveryapp.data.user
 
 import android.content.Context
 import android.graphics.Bitmap
@@ -10,11 +10,11 @@ import com.android.volley.Response
 import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.StringRequest
 import com.google.gson.Gson
-import ir.nimaali.nimafooddeliveryapp.data.RequestEndPoints
-import ir.nimaali.nimafooddeliveryapp.data.VolleySingleTon
-import ir.nimaali.nimafooddeliveryapp.models.home.detail.Comment
-import ir.nimaali.nimafooddeliveryapp.models.home.detail.Food
-import ir.nimaali.nimafooddeliveryapp.models.user.UserSellerRegisterLogin
+import ir.danialchoopan.danialfooddeliveryapp.data.RequestEndPoints
+import ir.danialchoopan.danialfooddeliveryapp.data.VolleySingleTon
+import ir.danialchoopan.danialfooddeliveryapp.models.home.detail.Comment
+import ir.danialchoopan.danialfooddeliveryapp.models.home.detail.Food
+import ir.danialchoopan.danialfooddeliveryapp.models.user.UserSellerRegisterLogin
 import org.json.JSONException
 import org.json.JSONObject
 import java.io.ByteArrayOutputStream

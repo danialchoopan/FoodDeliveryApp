@@ -1,8 +1,8 @@
-package ir.nimaali.nimafooddeliveryapp.data.check_internet
+package ir.danialchoopan.danialfooddeliveryapp.data.check_internet
 
 import android.content.Context
 import com.android.volley.toolbox.StringRequest
-import ir.nimaali.nimafooddeliveryapp.data.VolleySingleTon
+import ir.danialchoopan.danialfooddeliveryapp.data.VolleySingleTon
 
 class InternetCheck(val m_context:Context) {
     fun checkConnection(success:()->Unit,failed:()->Unit){

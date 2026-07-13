@@ -1,55 +1,24 @@
-package ir.nimaali.nimafooddeliveryapp.screen.seller.food
-
+package ir.danialchoopan.danialfooddeliveryapp.screen.seller.food
 
 import android.content.Context
-import android.content.SharedPreferences
-import android.provider.CalendarContract.Colors
-import android.view.MenuItem
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AddCircle
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.ArrowDropDown
-import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.ExitToApp
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.List
-import androidx.compose.material.icons.filled.Menu
-import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import androidx.navigation.NavController
 import androidx.navigation.NavHostController
-import ir.nimaali.nimafooddeliveryapp.data.seller.SellerFoodRequestGroup
-import ir.nimaali.nimafooddeliveryapp.models.home.Restaurant
-import ir.nimaali.nimafooddeliveryapp.models.seller.Food
-import ir.nimaali.nimafooddeliveryapp.screen.functions.LoadingProgressbar
-import ir.nimaali.nimafooddeliveryapp.ui.theme.BackgroundColor
-import ir.nimaali.nimafooddeliveryapp.ui.theme.PrimaryColor
-import ir.nimaali.nimafooddeliveryapp.ui.theme.SurfaceColor
-import ir.nimaali.nimafooddeliveryapp.ui.theme.vazirFontFamily
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
+import ir.danialchoopan.danialfooddeliveryapp.data.seller.SellerFoodRequestGroup
+import ir.danialchoopan.danialfooddeliveryapp.models.seller.Food
+import ir.danialchoopan.danialfooddeliveryapp.screen.functions.*
+import ir.danialchoopan.danialfooddeliveryapp.ui.theme.*
+import androidx.compose.ui.platform.LocalContext
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -79,19 +48,10 @@ fun SellerFoodListScreen(navHostController: NavHostController) {
 
 
     Scaffold(
+        containerColor = BackgroundColor,
         topBar = {
-            TopAppBar(
-                title = {
-                    Text(
-                        "لیست غذاها",
-                        style = MaterialTheme.typography.headlineSmall,
-                        fontFamily = vazirFontFamily,
-                        textAlign = TextAlign.Center,
-                        color = Color.White,
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color(0xFF4CAF50)),
+            GradientTopBar(
+                title = "لیست غذاها",
                 actions = {
                     IconButton(onClick = {
                         navHostController.popBackStack()
@@ -100,7 +60,7 @@ fun SellerFoodListScreen(navHostController: NavHostController) {
                             Icons.Default.Close,
                             contentDescription = "برگشت",
                             modifier = Modifier.size(42.dp),
-                            tint = Color.White
+                            tint = MaterialTheme.colorScheme.onPrimary
                         )
                     }
                 }
@@ -116,18 +76,10 @@ fun SellerFoodListScreen(navHostController: NavHostController) {
 
         } else {
             if (listFoods.isEmpty()) {
-                Column(
-                    verticalArrangement = Arrangement.Center,
-                    horizontalAlignment = Alignment.CenterHorizontally,
+                EmptyState(
+                    message = "شما هنوز غذایی را اضافه نکرده اید",
                     modifier = Modifier.fillMaxSize()
-                ) {
-                    Text(
-                        "شما هنوز غذایی را اضافه نکرده اید",
-                        color = MaterialTheme.colorScheme.error
-                    )
-
-
-                }
+                )
             } else {
                 LazyColumn(
                     modifier = Modifier
@@ -135,39 +87,37 @@ fun SellerFoodListScreen(navHostController: NavHostController) {
                         .padding(16.dp)
                 ) {
                     items(listFoods) { food ->
-                        Card(
+                        ModernCard(
                             modifier = Modifier
                                 .padding(vertical = 8.dp)
-                                .fillMaxWidth(),
-                            elevation = CardDefaults.cardElevation(4.dp)
+                                .fillMaxWidth()
                         ) {
                             Column(modifier = Modifier.padding(8.dp)) {
                                 ListItem(
                                     headlineContent = {
                                         Text(
                                             text = food.name,
-                                            style = MaterialTheme.typography.bodyLarge
+                                            style = MaterialTheme.typography.bodyLarge,
+                                            color = TextPrimary
                                         )
                                     },
                                     supportingContent = {
                                         Text(
                                             text = food.description,
                                             style = MaterialTheme.typography.bodyMedium,
-                                            fontFamily = vazirFontFamily
+                                            fontFamily = vazirFontFamily,
+                                            color = TextSecondary
                                         )
                                     },
                                     trailingContent = {
-                                        Text(
+                                        PillBadge(
                                             text = "${food.price} تومان",
-                                            color = Color(0xFF4CAF50),
-                                            style = MaterialTheme.typography.bodyMedium,
-                                            fontFamily = vazirFontFamily
+                                            backgroundColor = PrimaryColor
                                         )
                                     },
                                     modifier = Modifier.padding(8.dp)
                                 )
 
-                                // دکمه‌های ویرایش و حذف
                                 Row(
                                     horizontalArrangement = Arrangement.End,
                                     modifier = Modifier.fillMaxWidth()
@@ -179,7 +129,7 @@ fun SellerFoodListScreen(navHostController: NavHostController) {
                                         Icon(
                                             imageVector = Icons.Default.Delete,
                                             contentDescription = "حذف",
-                                            tint = Color.Red
+                                            tint = ErrorColor
                                         )
                                     }
                                     Spacer(modifier = Modifier.width(8.dp))
@@ -190,7 +140,7 @@ fun SellerFoodListScreen(navHostController: NavHostController) {
                                         Icon(
                                             imageVector = Icons.Default.Edit,
                                             contentDescription = "ویرایش",
-                                            tint = Color.DarkGray
+                                            tint = PrimaryColor
                                         )
                                     }
                                 }
@@ -203,14 +153,13 @@ fun SellerFoodListScreen(navHostController: NavHostController) {
             if (isDeleteDialogOpen) {
                 AlertDialog(
                     onDismissRequest = {
-                        // بستن دیالوگ در صورت نیاز
                         isDeleteDialogOpen = false
                     },
                     title = {
-                        Text(text = "آیا مطمئن هستید؟") // عنوان دیالوگ
+                        Text(text = "آیا مطمئن هستید?")
                     },
                     text = {
-                        Text(text = "این آیتم حذف خواهد شد. این عمل قابل بازگشت نیست.") // متن توضیحی دیالوگ
+                        Text(text = "این آیتم حذف خواهد شد. این عمل قابل بازگشت نیست.")
                     },
                     confirmButton = {
                         TextButton(onClick = {
@@ -220,16 +169,16 @@ fun SellerFoodListScreen(navHostController: NavHostController) {
                                     onGoingProgress = false
                                 }
                             }
-                            isDeleteDialogOpen = false // دیالوگ را ببندید
+                            isDeleteDialogOpen = false
                         }) {
-                            Text(text = "بله", color = Color.Red) // دکمه تایید حذف
+                            Text(text = "بله", color = ErrorColor)
                         }
                     },
                     dismissButton = {
                         TextButton(onClick = {
-                            isDeleteDialogOpen = false // بستن دیالوگ بدون حذف
+                            isDeleteDialogOpen = false
                         }) {
-                            Text(text = "خیر") // دکمه لغو حذف
+                            Text(text = "خیر")
                         }
                     }
                 )

@@ -1,53 +1,22 @@
-package ir.nimaali.nimafooddeliveryapp.screen.seller.order
+package ir.danialchoopan.danialfooddeliveryapp.screen.seller.order
 
-
-import android.content.Context
-import android.content.SharedPreferences
-import android.provider.CalendarContract.Colors
-import android.view.MenuItem
 import android.widget.Toast
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AddCircle
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.ArrowDropDown
-import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.ExitToApp
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.List
-import androidx.compose.material.icons.filled.Menu
-import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import androidx.navigation.NavController
+import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavHostController
-import ir.nimaali.nimafooddeliveryapp.data.seller.SellerHomeRequestGroup
-import ir.nimaali.nimafooddeliveryapp.models.seller.dash.SellerOrdersDashShowItem
-import ir.nimaali.nimafooddeliveryapp.screen.functions.LoadingProgressbar
-import ir.nimaali.nimafooddeliveryapp.ui.theme.BackgroundColor
-import ir.nimaali.nimafooddeliveryapp.ui.theme.PrimaryColor
-import ir.nimaali.nimafooddeliveryapp.ui.theme.SurfaceColor
-import ir.nimaali.nimafooddeliveryapp.ui.theme.vazirFontFamily
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
+import ir.danialchoopan.danialfooddeliveryapp.data.seller.SellerHomeRequestGroup
+import ir.danialchoopan.danialfooddeliveryapp.models.seller.dash.SellerOrdersDashShowItem
+import ir.danialchoopan.danialfooddeliveryapp.screen.functions.*
+import ir.danialchoopan.danialfooddeliveryapp.ui.theme.*
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -72,26 +41,17 @@ fun SellerOrderHistoryScreen(navController: NavHostController) {
     }
 
     Scaffold(
+        containerColor = BackgroundColor,
         topBar = {
-            TopAppBar(
-                title = {
-                    Text(
-                        "تاریخچه سفارش",
-                        style = MaterialTheme.typography.headlineSmall,
-                        fontFamily = vazirFontFamily,
-                        textAlign = TextAlign.Center,
-                        color = Color.White,
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color(0xFF4CAF50)),
+            GradientTopBar(
+                title = "تاریخچه سفارش",
                 actions = {
                     IconButton(onClick = { navController.popBackStack() }) {
                         Icon(
                             Icons.Default.Close,
                             contentDescription = "برگشت",
                             modifier = Modifier.size(42.dp),
-                            tint = Color.White
+                            tint = MaterialTheme.colorScheme.onPrimary
                         )
                     }
                 }
@@ -111,15 +71,10 @@ fun SellerOrderHistoryScreen(navController: NavHostController) {
                     .fillMaxSize()
             ) {
                 if (listOrders.isEmpty()) {
-                    Box(
-                        modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            "شما هیچ سفارش در حال انجام ندارید!.\n برای دریافت سفارش لطفا عذا به رستوران خود اضافه کنید",
-                            style = MaterialTheme.typography.titleLarge,
-                            fontFamily = vazirFontFamily
-                        )
-                    }
+                    EmptyState(
+                        message = "شما هیچ سفارش در حال انجام ندارید!.\n برای دریافت سفارش لطفا عذا به رستوران خود اضافه کنید",
+                        modifier = Modifier.fillMaxSize()
+                    )
                 } else {
                     LazyColumn(modifier = Modifier.fillMaxSize()) {
                         items(listOrders) { order ->
@@ -129,41 +84,40 @@ fun SellerOrderHistoryScreen(navController: NavHostController) {
                             val orderTime = order.orderDate
                             val foods = order.foodDetails
 
-                            Card(
+                            ModernCard(
                                 modifier = Modifier
                                     .padding(8.dp)
-                                    .fillMaxWidth(),
-                                elevation = CardDefaults.cardElevation(4.dp)
+                                    .fillMaxWidth()
                             ) {
                                 Column(modifier = Modifier.padding(16.dp)) {
                                     Text(
                                         "نام سفارش‌دهنده: $customerName",
                                         style = MaterialTheme.typography.bodyLarge,
-                                        fontFamily = vazirFontFamily
+                                        fontFamily = vazirFontFamily,
+                                        color = TextPrimary
                                     )
                                     Spacer(modifier = Modifier.height(8.dp))
-                                    Text(
-                                        "وضعیت سفارش: $orderStatus",
-                                        style = MaterialTheme.typography.bodyMedium,
-                                        color = Color.Gray
-                                    )
+                                    StatusChip(status = orderStatus)
                                     Spacer(modifier = Modifier.height(8.dp))
                                     Text(
                                         "آدرس: $address",
                                         style = MaterialTheme.typography.bodyMedium,
-                                        fontFamily = vazirFontFamily
+                                        fontFamily = vazirFontFamily,
+                                        color = TextSecondary
                                     )
                                     Spacer(modifier = Modifier.height(8.dp))
                                     Text(
                                         "زمان سفارش: $orderTime",
                                         style = MaterialTheme.typography.bodyMedium,
-                                        fontFamily = vazirFontFamily
+                                        fontFamily = vazirFontFamily,
+                                        color = TextSecondary
                                     )
                                     Spacer(modifier = Modifier.height(8.dp))
                                     Text(
                                         "لیست غذاها:",
                                         style = MaterialTheme.typography.bodyLarge,
-                                        fontFamily = vazirFontFamily
+                                        fontFamily = vazirFontFamily,
+                                        color = TextPrimary
                                     )
                                     foods.forEach { food ->
                                         val foodName = food.foodName
@@ -171,17 +125,19 @@ fun SellerOrderHistoryScreen(navController: NavHostController) {
                                         Text(
                                             "$foodName - $quantity عدد",
                                             style = MaterialTheme.typography.bodyMedium,
-                                            fontFamily = vazirFontFamily
+                                            fontFamily = vazirFontFamily,
+                                            color = TextSecondary
                                         )
                                     }
-                                    Spacer(modifier = Modifier.height(8.dp))
+                                    Spacer(modifier = Modifier.height(12.dp))
                                     Row(
                                         horizontalArrangement = Arrangement.Center,
                                         verticalAlignment = Alignment.CenterVertically,
-                                        modifier = Modifier.fillMaxSize()
+                                        modifier = Modifier.fillMaxWidth()
                                     ) {
                                         if (orderStatus=="تایید رستوران") {
-                                            Button(
+                                            GradientButton(
+                                                text = "تایید سفارش",
                                                 onClick = {
                                                     sellerHomeRequestGroup.setGettingOrderReady(order.orderId.toString()){
                                                         Toast.makeText(m_context,"سفارش توسط شما تایید شد",
@@ -191,27 +147,16 @@ fun SellerOrderHistoryScreen(navController: NavHostController) {
                                                             onGoingProgress=false
                                                         }
                                                     }
-                                                },
-                                                colors = ButtonDefaults.buttonColors(
-                                                    containerColor = Color(0xFF013220)
-                                                )
-                                            ) {
-                                                Text(
-                                                    "تایید سفارش", fontFamily = vazirFontFamily
-                                                )
-                                            }
+                                                }
+                                            )
                                             Spacer(modifier = Modifier.width(16.dp))
                                         }
-                                        Button(
+                                        GradientButton(
+                                            text = "جزئیات سفارش",
                                             onClick = {
                                                 navController.navigate("seller/order/detail/"+order.orderId)
-                                            },
-                                            colors = ButtonDefaults.buttonColors(containerColor = Color.Blue)
-                                        ) {
-                                            Text(
-                                                "جزئیات سفارش", fontFamily = vazirFontFamily
-                                            )
-                                        }
+                                            }
+                                        )
                                     }
                                 }
                             }
@@ -223,5 +168,3 @@ fun SellerOrderHistoryScreen(navController: NavHostController) {
         }
     }
 }
-
-

@@ -1,57 +1,22 @@
-package ir.nimaali.nimafooddeliveryapp.screen.seller.comment
+package ir.danialchoopan.danialfooddeliveryapp.screen.seller.comment
 
-
-import android.content.Context
-import android.content.SharedPreferences
-import android.provider.CalendarContract.Colors
-import android.view.MenuItem
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AddCircle
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.ArrowDropDown
-import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.ExitToApp
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.List
-import androidx.compose.material.icons.filled.Menu
-import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import androidx.navigation.NavController
+import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavHostController
-import ir.nimaali.nimafooddeliveryapp.data.seller.SellerCommentRequestGroup
-import ir.nimaali.nimafooddeliveryapp.data.seller.SellerFoodRequestGroup
-import ir.nimaali.nimafooddeliveryapp.models.home.Restaurant
-import ir.nimaali.nimafooddeliveryapp.models.seller.Food
-import ir.nimaali.nimafooddeliveryapp.models.seller.comment.Comment
-import ir.nimaali.nimafooddeliveryapp.screen.functions.LoadingProgressbar
-import ir.nimaali.nimafooddeliveryapp.ui.theme.BackgroundColor
-import ir.nimaali.nimafooddeliveryapp.ui.theme.PrimaryColor
-import ir.nimaali.nimafooddeliveryapp.ui.theme.SurfaceColor
-import ir.nimaali.nimafooddeliveryapp.ui.theme.vazirFontFamily
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
+import ir.danialchoopan.danialfooddeliveryapp.data.seller.SellerCommentRequestGroup
+import ir.danialchoopan.danialfooddeliveryapp.models.seller.comment.Comment
+import ir.danialchoopan.danialfooddeliveryapp.screen.functions.*
+import ir.danialchoopan.danialfooddeliveryapp.ui.theme.*
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -81,19 +46,10 @@ fun SellerCommentScreen(navHostController: NavHostController) {
 
 
     Scaffold(
+        containerColor = BackgroundColor,
         topBar = {
-            TopAppBar(
-                title = {
-                    Text(
-                        "لیست نظرات رستوران",
-                        style = MaterialTheme.typography.headlineSmall,
-                        fontFamily = vazirFontFamily,
-                        textAlign = TextAlign.Center,
-                        color = Color.White,
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color(0xFF4CAF50)),
+            GradientTopBar(
+                title = "لیست نظرات رستوران",
                 actions = {
                     IconButton(onClick = {
                         navHostController.popBackStack()
@@ -102,7 +58,7 @@ fun SellerCommentScreen(navHostController: NavHostController) {
                             Icons.Default.Close,
                             contentDescription = "برگشت",
                             modifier = Modifier.size(42.dp),
-                            tint = Color.White
+                            tint = MaterialTheme.colorScheme.onPrimary
                         )
                     }
                 }
@@ -118,18 +74,10 @@ fun SellerCommentScreen(navHostController: NavHostController) {
 
         } else {
             if (listComment.isEmpty()) {
-                Column(
-                    verticalArrangement = Arrangement.Center,
-                    horizontalAlignment = Alignment.CenterHorizontally,
+                EmptyState(
+                    message = "درمورد رستوران شما هنوز نظری ثبت نشده است",
                     modifier = Modifier.fillMaxSize()
-                ) {
-                    Text(
-                        "درمورد رستوران شما هنوز نظری ثبت نشده است",
-                        color = MaterialTheme.colorScheme.error
-                    )
-
-
-                }
+                )
             } else {
                 LazyColumn(
                     modifier = Modifier
@@ -137,30 +85,25 @@ fun SellerCommentScreen(navHostController: NavHostController) {
                         .padding(16.dp)
                 ) {
                     items(listComment) { comment ->
-                        Card(
+                        ModernCard(
                             modifier = Modifier
                                 .padding(vertical = 8.dp)
-                                .fillMaxWidth(),
-                            elevation = CardDefaults.cardElevation(4.dp)
+                                .fillMaxWidth()
                         ) {
                             Column(modifier = Modifier.padding(8.dp)) {
                                 ListItem(
                                     headlineContent = {
                                         Text(
                                             text = comment.commentContent,
-                                            style = MaterialTheme.typography.bodyLarge
+                                            style = MaterialTheme.typography.bodyLarge,
+                                            color = TextPrimary
                                         )
                                     },
-                                    supportingContent = {
-
-                                    },
-                                    trailingContent = {
-
-                                    },
+                                    supportingContent = {},
+                                    trailingContent = {},
                                     modifier = Modifier.padding(8.dp)
                                 )
 
-                                // دکمه‌های ویرایش و حذف
                                 Row(
                                     horizontalArrangement = Arrangement.End,
                                     modifier = Modifier.fillMaxWidth()
@@ -172,7 +115,7 @@ fun SellerCommentScreen(navHostController: NavHostController) {
                                         Icon(
                                             imageVector = Icons.Default.Delete,
                                             contentDescription = "حذف",
-                                            tint = Color.Red
+                                            tint = ErrorColor
                                         )
                                     }
                                 }
@@ -185,14 +128,13 @@ fun SellerCommentScreen(navHostController: NavHostController) {
             if (isDeleteDialogOpen) {
                 AlertDialog(
                     onDismissRequest = {
-                        // بستن دیالوگ در صورت نیاز
                         isDeleteDialogOpen = false
                     },
                     title = {
-                        Text(text = "آیا مطمئن هستید؟") // عنوان دیالوگ
+                        Text(text = "آیا مطمئن هستید؟")
                     },
                     text = {
-                        Text(text = "این آیتم حذف خواهد شد. این عمل قابل بازگشت نیست.") // متن توضیحی دیالوگ
+                        Text(text = "این آیتم حذف خواهد شد. این عمل قابل بازگشت نیست.")
                     },
                     confirmButton = {
                         TextButton(onClick = {
@@ -204,16 +146,16 @@ fun SellerCommentScreen(navHostController: NavHostController) {
                                     onGoingProgress = false
                                 }
                             }
-                            isDeleteDialogOpen = false // دیالوگ را ببندید
+                            isDeleteDialogOpen = false
                         }) {
-                            Text(text = "بله", color = Color.Red) // دکمه تایید حذف
+                            Text(text = "بله", color = ErrorColor)
                         }
                     },
                     dismissButton = {
                         TextButton(onClick = {
-                            isDeleteDialogOpen = false // بستن دیالوگ بدون حذف
+                            isDeleteDialogOpen = false
                         }) {
-                            Text(text = "خیر") // دکمه لغو حذف
+                            Text(text = "خیر")
                         }
                     }
                 )

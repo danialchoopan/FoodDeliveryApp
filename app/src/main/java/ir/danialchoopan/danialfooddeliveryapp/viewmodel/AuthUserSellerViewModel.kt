@@ -1,9 +1,9 @@
-package ir.nimaali.nimafooddeliveryapp.viewmodel
+package ir.danialchoopan.danialfooddeliveryapp.viewmodel
 
 import android.content.Context
 import androidx.lifecycle.ViewModel
-import ir.nimaali.nimafooddeliveryapp.data.user.UserAuthRequestGroup
-import ir.nimaali.nimafooddeliveryapp.models.user.UserData
+import ir.danialchoopan.danialfooddeliveryapp.data.user.UserAuthRequestGroup
+import ir.danialchoopan.danialfooddeliveryapp.models.user.UserData
 
 class AuthUserSellerViewModel : ViewModel() {
 

@@ -1,14 +1,13 @@
-package ir.nimaali.nimafooddeliveryapp.screen.auth
+package ir.danialchoopan.danialfooddeliveryapp.screen.auth
 
 import android.content.Context
 import android.content.SharedPreferences
-import android.provider.CalendarContract.Colors
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -18,15 +17,18 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import ir.nimaali.nimafooddeliveryapp.ui.theme.BackgroundColor
-import ir.nimaali.nimafooddeliveryapp.ui.theme.PrimaryColor
-import ir.nimaali.nimafooddeliveryapp.ui.theme.SurfaceColor
-import ir.nimaali.nimafooddeliveryapp.ui.theme.vazirFontFamily
-import ir.nimaali.nimafooddeliveryapp.viewmodel.AuthUserSellerViewModel
+import ir.danialchoopan.danialfooddeliveryapp.screen.functions.GradientButton
+import ir.danialchoopan.danialfooddeliveryapp.screen.functions.GradientTopBar
+import ir.danialchoopan.danialfooddeliveryapp.ui.theme.BackgroundColor
+import ir.danialchoopan.danialfooddeliveryapp.ui.theme.BorderColor
+import ir.danialchoopan.danialfooddeliveryapp.ui.theme.PrimaryColor
+import ir.danialchoopan.danialfooddeliveryapp.ui.theme.TextPrimary
+import ir.danialchoopan.danialfooddeliveryapp.ui.theme.vazirFontFamily
+import ir.danialchoopan.danialfooddeliveryapp.viewmodel.AuthUserSellerViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
@@ -37,47 +39,28 @@ fun SellerLoginScreen(navController: NavController) {
     var password by remember { mutableStateOf("") }
     var errorMessage by remember { mutableStateOf("") }
 
-    //auth
     val authUserViewModel: AuthUserSellerViewModel = viewModel()
-
-    //context
-    val m_context= LocalContext.current
+    val m_context = LocalContext.current
 
     Scaffold(
         modifier = Modifier.background(color = BackgroundColor),
-
         topBar = {
-            TopAppBar(
-                title = {
-                    Text(
-                        "ورود فروشندگان",
-                        style = MaterialTheme.typography.headlineSmall,
-                        fontFamily = vazirFontFamily,
-                        modifier = Modifier.fillMaxWidth(),
-                        textAlign = TextAlign.Center,
-                        color = Color.White
-                    )
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color(0xFF1565C0) // Deep Blue
-                ),
+            GradientTopBar(
+                title = "ورود فروشندگان",
                 navigationIcon = {
                     IconButton(onClick = {
-                        // عملکرد بازگشت
-                        navController.navigate("user_login"){
+                        navController.navigate("user_login") {
                             popUpTo(0)
                         }
                     }) {
                         Icon(
-                            imageVector = Icons.Default.Close, // آیکون بازگشت پیش‌فرض
+                            imageVector = Icons.Default.Close,
                             contentDescription = "بازگشت",
                             tint = Color.White
                         )
                     }
                 }
             )
-
-
         },
         content = { padding ->
             Column(
@@ -90,79 +73,86 @@ fun SellerLoginScreen(navController: NavController) {
             ) {
                 Spacer(modifier = Modifier.height(8.dp))
 
-                Spacer(modifier = Modifier.height(10.dp))
-
                 Text(
-                    "نیما فود",
-                    style = MaterialTheme.typography.headlineMedium,
-                    fontFamily = vazirFontFamily
+                    "دانیال فود",
+                    style = MaterialTheme.typography.headlineLarge,
+                    fontFamily = vazirFontFamily,
+                    color = PrimaryColor,
+                    fontSize = 32.sp
                 )
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(4.dp))
                 Text(
                     "فروش بیشتر با ما!",
                     style = MaterialTheme.typography.headlineSmall,
-                    fontFamily = vazirFontFamily
+                    fontFamily = vazirFontFamily,
+                    color = TextPrimary
                 )
-                Spacer(modifier = Modifier.height(14.dp))
+                Spacer(modifier = Modifier.height(16.dp))
 
                 OutlinedTextField(
                     value = phoneNumber,
                     onValueChange = { phoneNumber = it },
-                    label = { Text("شماره تلفن") },
+                    label = { Text("شماره تلفن", fontFamily = vazirFontFamily) },
                     modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(16.dp),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = PrimaryColor,
+                        unfocusedBorderColor = BorderColor,
+                        cursorColor = PrimaryColor
+                    ),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
                     maxLines = 1
                 )
 
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(12.dp))
 
                 OutlinedTextField(
                     value = password,
                     onValueChange = { password = it },
-                    label = { Text("رمز عبور") },
+                    label = { Text("رمز عبور", fontFamily = vazirFontFamily) },
                     modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(16.dp),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = PrimaryColor,
+                        unfocusedBorderColor = BorderColor,
+                        cursorColor = PrimaryColor
+                    ),
                     visualTransformation = PasswordVisualTransformation(),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
                     maxLines = 1
                 )
 
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(20.dp))
 
-                Button(
+                GradientButton(
+                    text = "ورود",
                     onClick = {
                         if (password.isNotEmpty() && phoneNumber.isNotEmpty()) {
                             authUserViewModel.sellerLoginRequest(
                                 m_context,
                                 phoneNumber,
                                 password
-                            ) {success->
-                                if(success){
-                                    navController.navigate("dashboard_seller"){
+                            ) { success ->
+                                if (success) {
+                                    navController.navigate("dashboard_seller") {
                                         popUpTo(0)
                                     }
-                                }else{
+                                } else {
                                     errorMessage = "مشکلی پیش آمده است لطفا بعدا امتحان کنید"
                                 }
                             }
                         } else {
                             errorMessage = "لطفا فیلد های لازم را پر کنید"
                         }
-                    },
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text(
-                        "ورود",
-                        fontFamily = vazirFontFamily,
-                        style = MaterialTheme.typography.headlineSmall
-                    )
-                }
+                    }
+                )
 
                 if (errorMessage.isNotEmpty()) {
                     Spacer(modifier = Modifier.height(8.dp))
-                    Text(errorMessage, color = MaterialTheme.colorScheme.error)
+                    Text(errorMessage, color = MaterialTheme.colorScheme.error, fontFamily = vazirFontFamily)
                 }
 
-                Spacer(modifier = Modifier.height(18.dp))
+                Spacer(modifier = Modifier.height(12.dp))
 
                 TextButton(onClick = {
                     navController.navigate("seller_register")
@@ -178,7 +168,6 @@ fun SellerLoginScreen(navController: NavController) {
     )
 }
 
-// بررسی وضعیت ورود فروشنده
 suspend fun checkSellerLogin(context: Context, navController: NavController) {
     withContext(Dispatchers.IO) {
         val prefs: SharedPreferences =

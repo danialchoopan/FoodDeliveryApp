@@ -1,11 +1,11 @@
-package ir.nimaali.nimafooddeliveryapp.screen.auth
+package ir.danialchoopan.danialfooddeliveryapp.screen.auth
 
 import android.content.Context
 import android.content.SharedPreferences
-import android.provider.CalendarContract.Colors
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -17,13 +17,17 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import ir.nimaali.nimafooddeliveryapp.ui.theme.BackgroundColor
-import ir.nimaali.nimafooddeliveryapp.ui.theme.PrimaryColor
-import ir.nimaali.nimafooddeliveryapp.ui.theme.SurfaceColor
-import ir.nimaali.nimafooddeliveryapp.ui.theme.vazirFontFamily
-import ir.nimaali.nimafooddeliveryapp.viewmodel.AuthUserSellerViewModel
+import ir.danialchoopan.danialfooddeliveryapp.screen.functions.GradientButton
+import ir.danialchoopan.danialfooddeliveryapp.screen.functions.GradientTopBar
+import ir.danialchoopan.danialfooddeliveryapp.ui.theme.BackgroundColor
+import ir.danialchoopan.danialfooddeliveryapp.ui.theme.BorderColor
+import ir.danialchoopan.danialfooddeliveryapp.ui.theme.PrimaryColor
+import ir.danialchoopan.danialfooddeliveryapp.ui.theme.TextPrimary
+import ir.danialchoopan.danialfooddeliveryapp.ui.theme.vazirFontFamily
+import ir.danialchoopan.danialfooddeliveryapp.viewmodel.AuthUserSellerViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
@@ -34,129 +38,117 @@ fun UserLoginScreen(navController: NavController) {
     var password by remember { mutableStateOf("") }
     var errorMessage by remember { mutableStateOf("") }
 
-    //auth
     val authUserViewModel: AuthUserSellerViewModel = viewModel()
-
-    //context
-    val m_context= LocalContext.current
+    val m_context = LocalContext.current
 
     Scaffold(
         modifier = Modifier.background(color = BackgroundColor),
-
         topBar = {
-            TopAppBar(
-            title = {
-                Text(
-                    "ورود کاربر",
-                    style = MaterialTheme.typography.headlineSmall,
-                    fontFamily = vazirFontFamily,
-                    modifier = Modifier.fillMaxWidth(),
-                    textAlign = TextAlign.Center,
-                    color = Color.White
-                )
-            },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color(0xFF1565C0) // Deep Blue
-                ),// Custom Light Blue (SkyBlue)
-            actions = {
-                // اقدامات
-            }
-        )
-
+            GradientTopBar(title = "ورود کاربر")
         },
         content = { padding ->
             Column(
                 modifier = Modifier
                     .padding(padding)
                     .padding(16.dp)
-                    .fillMaxSize()
-                ,
+                    .fillMaxSize(),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Top
             ) {
                 Spacer(modifier = Modifier.height(8.dp))
+
                 Text(
-                    "ورود فروشندگان",
-                    style = MaterialTheme.typography.headlineSmall,
+                    "دانیال فود",
+                    style = MaterialTheme.typography.headlineLarge,
                     fontFamily = vazirFontFamily,
-                    modifier = Modifier.fillMaxWidth().clickable {
-                        navController.navigate("seller_login")
-                    },
-                    textAlign = TextAlign.Right,
-                    color = Color(0xFF03A9F4),
+                    color = PrimaryColor,
+                    fontSize = 32.sp
                 )
-
-                Spacer(modifier = Modifier.height(10.dp))
-
-                Text(
-                    "نیما فود",
-                    style = MaterialTheme.typography.headlineMedium,
-                    fontFamily = vazirFontFamily
-                )
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(4.dp))
                 Text(
                     "سفارش بده، لذت ببر!",
                     style = MaterialTheme.typography.headlineSmall,
-                    fontFamily = vazirFontFamily
+                    fontFamily = vazirFontFamily,
+                    color = TextPrimary
                 )
-                Spacer(modifier = Modifier.height(14.dp))
+                Spacer(modifier = Modifier.height(16.dp))
 
                 OutlinedTextField(
                     value = phoneNumber,
                     onValueChange = { phoneNumber = it },
-                    label = { Text("شماره تلفن") },
+                    label = { Text("شماره تلفن", fontFamily = vazirFontFamily) },
                     modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(16.dp),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = PrimaryColor,
+                        unfocusedBorderColor = BorderColor,
+                        cursorColor = PrimaryColor
+                    ),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
                     maxLines = 1
                 )
 
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(12.dp))
 
                 OutlinedTextField(
                     value = password,
                     onValueChange = { password = it },
-                    label = { Text("رمز عبور") },
+                    label = { Text("رمز عبور", fontFamily = vazirFontFamily) },
                     modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(16.dp),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = PrimaryColor,
+                        unfocusedBorderColor = BorderColor,
+                        cursorColor = PrimaryColor
+                    ),
                     visualTransformation = PasswordVisualTransformation(),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
                     maxLines = 1
                 )
 
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(20.dp))
 
-                Button(
+                GradientButton(
+                    text = "ورود",
                     onClick = {
                         if (password.isNotEmpty() && phoneNumber.isNotEmpty()) {
                             authUserViewModel.userLoginRequest(
                                 m_context,
                                 phoneNumber,
                                 password
-                            ) {success->
-                                if(success){
-                                    navController.navigate("home_user"){
+                            ) { success ->
+                                if (success) {
+                                    navController.navigate("home_user") {
                                         popUpTo(0)
                                     }
-                                }else{
+                                } else {
                                     errorMessage = "مشکلی پیش آمده است لطفا بعدا امتحان کنید"
                                 }
                             }
                         } else {
                             errorMessage = "لطفا فیلد های لازم را پر کنید"
                         }
-
-                    },
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text("ورود", fontFamily = vazirFontFamily,
-                        style = MaterialTheme.typography.headlineSmall)
-                }
+                    }
+                )
 
                 if (errorMessage.isNotEmpty()) {
                     Spacer(modifier = Modifier.height(8.dp))
-                    Text(errorMessage, color = MaterialTheme.colorScheme.error)
+                    Text(errorMessage, color = MaterialTheme.colorScheme.error, fontFamily = vazirFontFamily)
                 }
 
-                Spacer(modifier = Modifier.height(18.dp))
+                Spacer(modifier = Modifier.height(8.dp))
+
+                Text(
+                    "ورود فروشندگان",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontFamily = vazirFontFamily,
+                    color = PrimaryColor,
+                    modifier = Modifier.clickable {
+                        navController.navigate("seller_login")
+                    }
+                )
+
+                Spacer(modifier = Modifier.height(12.dp))
 
                 TextButton(onClick = {
                     navController.navigate("user_register")
@@ -165,13 +157,9 @@ fun UserLoginScreen(navController: NavController) {
                         "حساب کاربری ندارید؟ ثبت‌نام کنید",
                         style = MaterialTheme.typography.titleMedium,
                         fontFamily = vazirFontFamily,
-
                     )
                 }
             }
         }
     )
 }
-
-
-

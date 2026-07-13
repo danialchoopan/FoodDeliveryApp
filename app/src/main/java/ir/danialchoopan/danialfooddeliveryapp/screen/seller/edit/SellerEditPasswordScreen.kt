@@ -1,12 +1,11 @@
-package ir.nimaali.nimafooddeliveryapp.screen.seller.edit
-
+package ir.danialchoopan.danialfooddeliveryapp.screen.seller.edit
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -15,21 +14,19 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import ir.nimaali.nimafooddeliveryapp.data.user.UserAuthRequestGroup
-import ir.nimaali.nimafooddeliveryapp.ui.theme.BackgroundColor
-import ir.nimaali.nimafooddeliveryapp.ui.theme.vazirFontFamily
+import ir.danialchoopan.danialfooddeliveryapp.data.user.UserAuthRequestGroup
+import ir.danialchoopan.danialfooddeliveryapp.screen.functions.GradientButton
+import ir.danialchoopan.danialfooddeliveryapp.screen.functions.GradientTopBar
+import ir.danialchoopan.danialfooddeliveryapp.ui.theme.*
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EditSellerPasswordScreen(navController: NavController) {
-    // context
     val m_context = LocalContext.current
 
-    // input fields
     var old_password by remember { mutableStateOf("") }
     var new_password by remember { mutableStateOf("") }
     var new_confirm_password by remember { mutableStateOf("") }
@@ -37,28 +34,18 @@ fun EditSellerPasswordScreen(navController: NavController) {
 
     Scaffold(
         modifier = Modifier.background(color = BackgroundColor),
+        containerColor = BackgroundColor,
         topBar = {
-            TopAppBar(
-                title = {
-                    Text(
-                        "ویرایش رمزعبور رستوران",
-                        style = MaterialTheme.typography.headlineSmall,
-                        fontFamily = vazirFontFamily,
-                        modifier = Modifier.fillMaxWidth(),
-                        textAlign = TextAlign.Center,
-                        color = Color.White
-                    )
-                },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color(0xFF1565C0)) // Deep Blue
-                , navigationIcon = {
+            GradientTopBar(
+                title = "ویرایش رمزعبور رستوران",
+                navigationIcon = {
                     IconButton(onClick = {
-                        // عملکرد بازگشت
                         navController.popBackStack()
                     }) {
                         Icon(
-                            imageVector = Icons.Default.ArrowBack, // آیکون بازگشت پیش‌فرض
+                            imageVector = Icons.Default.ArrowBack,
                             contentDescription = "بازگشت",
-                            tint = Color.White
+                            tint = MaterialTheme.colorScheme.onPrimary
                         )
                     }
                 }
@@ -75,48 +62,66 @@ fun EditSellerPasswordScreen(navController: NavController) {
             ) {
                 Spacer(modifier = Modifier.height(8.dp))
 
-                // رمز عبور
                 OutlinedTextField(
                     value = old_password,
                     onValueChange = { old_password = it },
-                    label = { Text("رمزعبور قبلی") },
+                    label = { Text("رمزعبور قبلی", fontFamily = vazirFontFamily) },
                     modifier = Modifier.fillMaxWidth(),
                     visualTransformation = PasswordVisualTransformation(),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-                    maxLines = 1
+                    maxLines = 1,
+                    shape = RoundedCornerShape(12.dp),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = PrimaryColor,
+                        unfocusedBorderColor = DividerColor,
+                        focusedContainerColor = CardSurface,
+                        unfocusedContainerColor = CardSurface
+                    )
                 )
 
 
                 Spacer(modifier = Modifier.height(8.dp))
 
-                // رمز عبور
                 OutlinedTextField(
                     value = new_password,
                     onValueChange = { new_password = it },
-                    label = { Text("رمز عبور جدید") },
+                    label = { Text("رمز عبور جدید", fontFamily = vazirFontFamily) },
                     modifier = Modifier.fillMaxWidth(),
                     visualTransformation = PasswordVisualTransformation(),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-                    maxLines = 1
+                    maxLines = 1,
+                    shape = RoundedCornerShape(12.dp),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = PrimaryColor,
+                        unfocusedBorderColor = DividerColor,
+                        focusedContainerColor = CardSurface,
+                        unfocusedContainerColor = CardSurface
+                    )
                 )
 
                 Spacer(modifier = Modifier.height(10.dp))
 
-                // تکرار رمز عبور
                 OutlinedTextField(
                     value = new_confirm_password,
                     onValueChange = { new_confirm_password = it },
-                    label = { Text("تکرار رمز عبور جدید") },
+                    label = { Text("تکرار رمز عبور جدید", fontFamily = vazirFontFamily) },
                     modifier = Modifier.fillMaxWidth(),
                     visualTransformation = PasswordVisualTransformation(),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-                    maxLines = 1
+                    maxLines = 1,
+                    shape = RoundedCornerShape(12.dp),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = PrimaryColor,
+                        unfocusedBorderColor = DividerColor,
+                        focusedContainerColor = CardSurface,
+                        unfocusedContainerColor = CardSurface
+                    )
                 )
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                // دکمه ذخیره تغییرات
-                Button(
+                GradientButton(
+                    text = "تغییر رمزعبور",
                     onClick = {
                         if (new_password.trim() == new_confirm_password.trim()) {
                             val userAuthRequestGroup = UserAuthRequestGroup(m_context)
@@ -138,18 +143,11 @@ fun EditSellerPasswordScreen(navController: NavController) {
                         }
                     },
                     modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text(
-                        "تغییر رمزعبور",
-                        fontFamily = vazirFontFamily,
-                        style = MaterialTheme.typography.headlineSmall
-                    )
-                }
+                )
 
-                // پیام خطا
                 if (errorMessage.isNotEmpty()) {
                     Spacer(modifier = Modifier.height(8.dp))
-                    Text(errorMessage, color = MaterialTheme.colorScheme.error)
+                    Text(errorMessage, color = ErrorColor)
                 }
             }
         }

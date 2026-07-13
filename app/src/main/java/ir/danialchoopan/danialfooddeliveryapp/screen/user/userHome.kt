@@ -1,10 +1,9 @@
-package ir.nimaali.nimafooddeliveryapp.screen.user
+package ir.danialchoopan.danialfooddeliveryapp.screen.user
 
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
 import android.net.Uri
-import android.provider.CalendarContract.Colors
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -12,6 +11,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
@@ -39,18 +39,15 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
-import ir.nimaali.nimafooddeliveryapp.data.RequestEndPoints
-import ir.nimaali.nimafooddeliveryapp.data.home.HomeRestaurantOderRequestGroup
-import ir.nimaali.nimafooddeliveryapp.data.user.UserAuthRequestGroup
-import ir.nimaali.nimafooddeliveryapp.formatPrice
-import ir.nimaali.nimafooddeliveryapp.models.home.Restaurant
-import ir.nimaali.nimafooddeliveryapp.models.home.order.OrderListUsersAllItem
-import ir.nimaali.nimafooddeliveryapp.screen.functions.LoadingProgressbar
-import ir.nimaali.nimafooddeliveryapp.ui.theme.BackgroundColor
-import ir.nimaali.nimafooddeliveryapp.ui.theme.PrimaryColor
-import ir.nimaali.nimafooddeliveryapp.ui.theme.SurfaceColor
-import ir.nimaali.nimafooddeliveryapp.ui.theme.vazirFontFamily
-import ir.nimaali.nimafooddeliveryapp.viewmodel.AuthUserSellerViewModel
+import ir.danialchoopan.danialfooddeliveryapp.data.RequestEndPoints
+import ir.danialchoopan.danialfooddeliveryapp.data.home.HomeRestaurantOderRequestGroup
+import ir.danialchoopan.danialfooddeliveryapp.data.user.UserAuthRequestGroup
+import ir.danialchoopan.danialfooddeliveryapp.formatPrice
+import ir.danialchoopan.danialfooddeliveryapp.models.home.Restaurant
+import ir.danialchoopan.danialfooddeliveryapp.models.home.order.OrderListUsersAllItem
+import ir.danialchoopan.danialfooddeliveryapp.screen.functions.*
+import ir.danialchoopan.danialfooddeliveryapp.ui.theme.*
+import ir.danialchoopan.danialfooddeliveryapp.viewmodel.AuthUserSellerViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
@@ -65,17 +62,37 @@ fun UserHomeScreen(navController: NavController) {
     var selectedIndex by remember { mutableStateOf(0) }
 
     Scaffold(
+        containerColor = BackgroundColor,
         bottomBar = {
-            NavigationBar {
+            NavigationBar(
+                containerColor = Color.White,
+                tonalElevation = 8.dp
+            ) {
                 screens.forEachIndexed { index, screen ->
                     NavigationBarItem(
                         selected = selectedIndex == index,
                         onClick = { selectedIndex = index },
                         icon = {
-                            when (screen) {
-                                "Restaurants" -> Icon(Icons.Default.Home, contentDescription = null)
-                                "Orders" -> Icon(Icons.Default.List, contentDescription = null)
-                                "Profile" -> Icon(Icons.Default.Person, contentDescription = null)
+                            Box(
+                                modifier = Modifier
+                                    .size(48.dp)
+                                    .clip(RoundedCornerShape(12.dp))
+                                    .background(
+                                        if (selectedIndex == index) PrimaryColor.copy(alpha = 0.12f)
+                                        else Color.Transparent
+                                    ),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(
+                                    when (screen) {
+                                        "Restaurants" -> Icons.Default.Home
+                                        "Orders" -> Icons.Default.List
+                                        "Profile" -> Icons.Default.Person
+                                        else -> Icons.Default.Home
+                                    },
+                                    contentDescription = null,
+                                    tint = if (selectedIndex == index) PrimaryColor else TextSecondary
+                                )
                             }
                         },
                         label = {
@@ -87,9 +104,15 @@ fun UserHomeScreen(navController: NavController) {
                                     else -> ""
                                 },
                                 fontFamily = vazirFontFamily,
-                                style = MaterialTheme.typography.bodyLarge
+                                style = MaterialTheme.typography.bodySmall,
+                                color = if (selectedIndex == index) PrimaryColor else TextSecondary
                             )
-                        }
+                        },
+                        colors = NavigationBarItemDefaults.colors(
+                            selectedIconColor = PrimaryColor,
+                            unselectedIconColor = TextSecondary,
+                            indicatorColor = PrimaryColor.copy(alpha = 0.12f)
+                        )
                     )
                 }
             }
@@ -97,7 +120,7 @@ fun UserHomeScreen(navController: NavController) {
     ) { innerPadding ->
         Box(modifier = Modifier.padding(innerPadding)) {
             when (selectedIndex) {
-                0 -> RestaurantsScreen(navController) // Ensure no Scaffold is used inside these screens
+                0 -> RestaurantsScreen(navController)
                 1 -> OrdersScreen(navController)
                 2 -> ProfileScreen(navController)
             }
@@ -134,18 +157,10 @@ fun RestaurantsScreen(navController: NavController) {
     }
 
     Scaffold(
+        containerColor = BackgroundColor,
         topBar = {
-            TopAppBar(
-                title = {
-                    Text(
-                        "رستوران‌های $usercity", style = MaterialTheme.typography.headlineSmall,
-                        fontFamily = vazirFontFamily,
-                        modifier = Modifier.fillMaxWidth(),
-                        textAlign = TextAlign.Center,
-                        color = Color.White
-                    )
-                },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color(0xFF4CAF50)),
+            GradientTopBar(
+                title = "رستوران‌های $usercity"
             )
         }
     ) { _ ->
@@ -156,22 +171,10 @@ fun RestaurantsScreen(navController: NavController) {
             }
         } else {
             if (listRestaurant.isEmpty()) {
-                Column(
-                    verticalArrangement = Arrangement.Center,
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    modifier = Modifier.fillMaxSize()
-                ) {
-                    if (errorMessage.isNotEmpty()) {
-                        Text(errorMessage, color = MaterialTheme.colorScheme.error)
-                    }
-                    if (listRestaurant.isEmpty()) {
-                        Text(
-                            "رستورانی در شهر شما قابل ارائه سرویس نمی باشد!",
-                            color = MaterialTheme.colorScheme.error
-                        )
-
-                    }
-                }
+                EmptyState(
+                    message = if (errorMessage.isNotEmpty()) errorMessage
+                    else "رستورانی در شهر شما قابل ارائه سرویس نمی باشد!"
+                )
             } else {
                 LazyColumn(
                     modifier = Modifier
@@ -186,18 +189,13 @@ fun RestaurantsScreen(navController: NavController) {
                         )
                     }
                     items(listRestaurant) { restaurant ->
-                        Card(
-                            modifier = Modifier
-                                .padding(8.dp)
-                                .clickable {
-                                    navController.navigate("home/restaurant/${restaurant.id}")
-                                },
-                            colors = CardDefaults.cardColors(containerColor = Color.White),
-                            elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+                        ModernCard(
+                            modifier = Modifier.padding(8.dp),
+                            onClick = {
+                                navController.navigate("home/restaurant/${restaurant.id}")
+                            }
                         ) {
                             Column {
-                                // Restaurant Image
-
                                 GlideImage(
                                     model = RequestEndPoints.rootDomain + "/" + restaurant.image,
                                     contentDescription = "",
@@ -207,45 +205,38 @@ fun RestaurantsScreen(navController: NavController) {
                                         .height(150.dp),
                                 )
 
-                                // Restaurant Details
                                 Column(
-                                    modifier = Modifier.padding(8.dp)
+                                    modifier = Modifier.padding(12.dp)
                                 ) {
                                     Text(
                                         text = restaurant.name,
                                         style = MaterialTheme.typography.titleMedium,
+                                        fontFamily = vazirFontFamily,
+                                        color = TextPrimary,
                                         modifier = Modifier.padding(bottom = 4.dp)
                                     )
                                     Text(
                                         text = restaurant.category,
                                         style = MaterialTheme.typography.bodyMedium,
-                                        fontFamily = vazirFontFamily
+                                        fontFamily = vazirFontFamily,
+                                        color = TextSecondary
                                     )
                                     Row(
                                         verticalAlignment = Alignment.CenterVertically,
                                         horizontalArrangement = Arrangement.End,
                                         modifier = Modifier
-                                            .fillMaxWidth() // Ensures the Row takes up the full width of the parent
+                                            .fillMaxWidth()
                                             .padding(top = 8.dp)
                                     ) {
-                                        Icon(
-                                            imageVector = if (restaurant.open) Icons.Default.CheckCircle else Icons.Default.Close,
-                                            contentDescription = null,
-                                            tint = if (restaurant.open) Color.Green else Color.Red
-                                        )
-                                        Spacer(modifier = Modifier.width(8.dp))
-                                        Text(
+                                        PillBadge(
                                             text = if (restaurant.open) "باز است" else "بسته است",
-                                            color = if (restaurant.open) Color.DarkGray else Color.Red,
-                                            style = MaterialTheme.typography.bodyMedium,
-                                            fontFamily = vazirFontFamily
+                                            backgroundColor = if (restaurant.open) SuccessColor else ErrorColor,
+                                            textColor = Color.White
                                         )
                                     }
-
                                 }
                             }
                         }
-
                     }
                 }
             }
@@ -273,18 +264,10 @@ fun OrdersScreen(navController: NavController) {
         loading = false
     }
     Scaffold(
+        containerColor = BackgroundColor,
         topBar = {
-            TopAppBar(
-                title = {
-                    Text(
-                        "سفارش‌ها", style = MaterialTheme.typography.headlineSmall,
-                        fontFamily = vazirFontFamily,
-                        modifier = Modifier.fillMaxWidth(),
-                        textAlign = TextAlign.Center,
-                        color = Color.White
-                    )
-                },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color(0xFF4CAF50))
+            GradientTopBar(
+                title = "سفارش‌ها"
             )
         }
     ) { innerPadding ->
@@ -294,13 +277,7 @@ fun OrdersScreen(navController: NavController) {
             }
         } else {
             if (listOrders.isEmpty()) {
-                Column(
-                    modifier = Modifier.fillMaxSize(),
-                    verticalArrangement = Arrangement.Center,
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Text("شما سفارش در حال انجام ندارید!")
-                }
+                EmptyState(message = "شما سفارش در حال انجام ندارید!")
             }
             Box(
                 modifier = Modifier
@@ -310,48 +287,39 @@ fun OrdersScreen(navController: NavController) {
             ) {
                 LazyColumn {
                     items(listOrders) { order ->
-                        Card(
+                        ModernCard(
                             modifier = Modifier
                                 .padding(8.dp)
-                                .fillMaxWidth(),
-                            elevation = CardDefaults.cardElevation(4.dp)
+                                .fillMaxWidth()
                         ) {
                             Column(modifier = Modifier.padding(16.dp)) {
-                                Text(
-                                    "وضعیت سفارش: ${order.status} ",
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    color = if (order.status == "تایید شده") Color.DarkGray else Color.Red
-                                )
-                                Spacer(modifier = Modifier.height(8.dp))
-                                Text(
-                                    " نام رستوران : " + order.seller_name,
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    fontFamily = vazirFontFamily
-                                )
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    modifier = Modifier.fillMaxWidth()
+                                ) {
+                                    Text(
+                                        "نام رستوران : " + order.seller_name,
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        fontFamily = vazirFontFamily,
+                                        color = TextPrimary
+                                    )
+                                    StatusChip(status = order.status)
+                                }
                                 Spacer(modifier = Modifier.height(8.dp))
                                 Text(
                                     "زمان سفارش: ${order.orderDate}",
                                     style = MaterialTheme.typography.bodyMedium,
-                                    fontFamily = vazirFontFamily
+                                    fontFamily = vazirFontFamily,
+                                    color = TextSecondary
                                 )
-                                Spacer(modifier = Modifier.height(8.dp))
-                                Spacer(modifier = Modifier.height(8.dp))
-                                Row(
-                                    horizontalArrangement = Arrangement.Center,
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    modifier = Modifier.fillMaxSize()
-                                ) {
-                                    Button(
-                                        onClick = {
-                                            navController.navigate("user/order/" + order.id)
-                                        },
-                                        colors = ButtonDefaults.buttonColors(containerColor = Color.Blue)
-                                    ) {
-                                        Text(
-                                            "جزئیات سفارش", fontFamily = vazirFontFamily
-                                        )
+                                Spacer(modifier = Modifier.height(12.dp))
+                                GradientButton(
+                                    text = "جزئیات سفارش",
+                                    onClick = {
+                                        navController.navigate("user/order/" + order.id)
                                     }
-                                }
+                                )
                             }
                         }
                     }
@@ -379,7 +347,7 @@ fun ProfileScreen(
         m_context.getSharedPreferences("app_data", Context.MODE_PRIVATE)
     val userData = authUserSellerViewModel.getUserLoginData(m_context)
 
-    val homeRestaurantOderRequestGroup=HomeRestaurantOderRequestGroup(m_context)
+    val homeRestaurantOderRequestGroup = HomeRestaurantOderRequestGroup(m_context)
     var userTotal by remember {
         mutableStateOf("")
     }
@@ -390,24 +358,16 @@ fun ProfileScreen(
         mutableStateOf("")
     }
     homeRestaurantOderRequestGroup.getUserOrderData { success, failed, totalOrder ->
-        userTotal=totalOrder
-        userSuccessOrder=success
-        userFailedOrder=failed
+        userTotal = totalOrder
+        userSuccessOrder = success
+        userFailedOrder = failed
 
     }
     Scaffold(
+        containerColor = BackgroundColor,
         topBar = {
-            TopAppBar(
-                title = {
-                    Text(
-                        "پروفایل کاربری", style = MaterialTheme.typography.headlineSmall,
-                        fontFamily = vazirFontFamily,
-                        modifier = Modifier.fillMaxWidth(),
-                        textAlign = TextAlign.Center,
-                        color = Color.White
-                    )
-                },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color(0xFF4CAF50)),
+            GradientTopBar(
+                title = "پروفایل کاربری"
             )
         }
     ) { innerPadding ->
@@ -420,172 +380,246 @@ fun ProfileScreen(
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(5.dp)
+                    .padding(16.dp)
             ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(5.dp)
-                        .border(1.dp, Color.Gray)
-                        .background(Color.White)
+                // Profile Header Card
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(16.dp),
+                    colors = CardDefaults.cardColors(containerColor = Color.Transparent)
                 ) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.Center,
-                        verticalAlignment = Alignment.CenterVertically,
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .background(GradientCard)
+                            .padding(20.dp)
                     ) {
                         Row(
-                            modifier = Modifier
-                                .fillMaxWidth(0.8f)
-                                .padding(vertical = 5.dp, horizontal = 20.dp),
-                            verticalAlignment = Alignment.CenterVertically
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically,
                         ) {
-                            Icon(
-                                imageVector = Icons.Default.Person,
-                                contentDescription = "",
-                                modifier = Modifier.size(70.dp)
-                            )
-                            Column {
-                                Text(text = userData.name, fontSize = 18.sp)
-                                Text(text = userData.phone, fontSize = 14.sp)
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth(0.75f),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Box(
+                                    modifier = Modifier
+                                        .size(60.dp)
+                                        .clip(CircleShape)
+                                        .background(Color.White.copy(alpha = 0.3f)),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.Person,
+                                        contentDescription = "",
+                                        modifier = Modifier.size(36.dp),
+                                        tint = Color.White
+                                    )
+                                }
+                                Spacer(modifier = Modifier.width(12.dp))
+                                Column {
+                                    Text(
+                                        text = userData.name,
+                                        fontSize = 18.sp,
+                                        color = Color.White,
+                                        fontFamily = vazirFontFamily
+                                    )
+                                    Text(
+                                        text = userData.phone,
+                                        fontSize = 14.sp,
+                                        color = Color.White.copy(alpha = 0.8f)
+                                    )
+                                }
                             }
-                        }
 
-                        IconButton(onClick = {
-                            onGoingProgress = true
-                            userSharedPreferences.edit().let {
-                                it.clear()
-                                it.apply()
-                                onGoingProgress = false
+                            IconButton(onClick = {
+                                onGoingProgress = true
+                                userSharedPreferences.edit().let {
+                                    it.clear()
+                                    it.apply()
+                                    onGoingProgress = false
+                                }
+                                navController.navigate("user_login") {
+                                    popUpTo(0)
+                                }
+                            }) {
+                                Icon(
+                                    imageVector = Icons.Default.ExitToApp,
+                                    tint = Color.White,
+                                    contentDescription = "",
+                                    modifier = Modifier.size(28.dp)
+                                )
                             }
-                            navController.navigate("user_login") {
-                                popUpTo(0)
-                            }
-                        }) {
-                            Icon(
-                                imageVector = Icons.Default.ExitToApp,
-                                tint = Color.Red,
-                                contentDescription = "",
-                                modifier = Modifier.size(50.dp)
-                            )
                         }
                     }
+                }
 
-                    Row(
-                        Modifier
-                            .fillMaxWidth(),
-                        horizontalArrangement = Arrangement.Center,
-                        verticalAlignment = Alignment.CenterVertically
+                Spacer(modifier = Modifier.height(12.dp))
+
+                // Edit Profile Button
+                OutlinedButton(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(14.dp)),
+                    onClick = {
+                        navController.navigate("home/user/edit")
+                    },
+                    colors = ButtonDefaults.outlinedButtonColors(
+                        contentColor = PrimaryColor
+                    ),
+                    border = ButtonDefaults.outlinedButtonBorder.copy(
+                        brush = androidx.compose.ui.graphics.SolidColor(PrimaryColor)
+                    )
+                ) {
+                    Text(
+                        text = "ویرایش اطلاعات کاربری",
+                        fontSize = 16.sp,
+                        fontFamily = vazirFontFamily
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // Order Stats Card
+                ModernCard(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(0.dp)
+                ) {
+                    Column(
+                        modifier = Modifier.padding(16.dp)
                     ) {
+                        Text(
+                            text = "آمار سفارش‌ها",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontFamily = vazirFontFamily,
+                            color = TextPrimary,
+                            modifier = Modifier.padding(bottom = 12.dp)
+                        )
+
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceEvenly
+                        ) {
+                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                Text(
+                                    text = formatPrice(userTotal),
+                                    style = MaterialTheme.typography.titleMedium,
+                                    color = PrimaryColor,
+                                    fontFamily = vazirFontFamily
+                                )
+                                Text(
+                                    text = "مجموع قیمت (تومان)",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = TextSecondary,
+                                    fontFamily = vazirFontFamily
+                                )
+                            }
+                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                Text(
+                                    text = userSuccessOrder,
+                                    style = MaterialTheme.typography.titleMedium,
+                                    color = SuccessColor,
+                                    fontFamily = vazirFontFamily
+                                )
+                                Text(
+                                    text = "موفق",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = TextSecondary,
+                                    fontFamily = vazirFontFamily
+                                )
+                            }
+                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                Text(
+                                    text = userFailedOrder,
+                                    style = MaterialTheme.typography.titleMedium,
+                                    color = ErrorColor,
+                                    fontFamily = vazirFontFamily
+                                )
+                                Text(
+                                    text = "لغو شده",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = TextSecondary,
+                                    fontFamily = vazirFontFamily
+                                )
+                            }
+                        }
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                // Action Buttons
+                ModernCard(modifier = Modifier.fillMaxWidth()) {
+                    Column(modifier = Modifier.padding(8.dp)) {
                         OutlinedButton(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(10.dp), onClick = {
-                                navController.navigate(
-                                    "home/user/edit"
-                                )
-                            }) {
+                                .padding(horizontal = 8.dp, vertical = 4.dp),
+                            onClick = {
+                                navController.navigate("user/orders/all")
+                            },
+                            colors = ButtonDefaults.outlinedButtonColors(
+                                contentColor = PrimaryColor
+                            ),
+                            border = ButtonDefaults.outlinedButtonBorder.copy(
+                                brush = androidx.compose.ui.graphics.SolidColor(BorderColor)
+                            )
+                        ) {
                             Text(
-                                text = "ویرایش اطلاعات کاربری",
-                                fontSize = 18.sp,
+                                text = "تاریخچه سفارش های کاربر",
+                                fontSize = 16.sp,
+                                fontFamily = vazirFontFamily
+                            )
+                        }
+
+                        OutlinedButton(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 8.dp, vertical = 4.dp),
+                            onClick = {
+                                val dialIntent = Intent(Intent.ACTION_DIAL, Uri.parse("tel:+989991112233"))
+                                m_context.startActivity(dialIntent)
+                            },
+                            colors = ButtonDefaults.outlinedButtonColors(
+                                contentColor = PrimaryColor
+                            ),
+                            border = ButtonDefaults.outlinedButtonBorder.copy(
+                                brush = androidx.compose.ui.graphics.SolidColor(BorderColor)
+                            )
+                        ) {
+                            Text(
+                                text = "تماس با ما",
+                                fontSize = 16.sp,
+                                fontFamily = vazirFontFamily
+                            )
+                        }
+
+                        OutlinedButton(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 8.dp, vertical = 4.dp),
+                            onClick = {
+                                navController.navigate("home/about/us")
+                            },
+                            colors = ButtonDefaults.outlinedButtonColors(
+                                contentColor = PrimaryColor
+                            ),
+                            border = ButtonDefaults.outlinedButtonBorder.copy(
+                                brush = androidx.compose.ui.graphics.SolidColor(BorderColor)
+                            )
+                        ) {
+                            Text(
+                                text = "درباره ما",
+                                fontSize = 16.sp,
                                 fontFamily = vazirFontFamily
                             )
                         }
                     }
                 }
-
-                // نمایش اطلاعات مربوط به سفارش‌ها
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(10.dp)
-                        .border(1.dp, Color.Gray)
-                        .background(Color.White)
-                ) {
-                    Spacer(modifier = Modifier.fillMaxWidth().height(8.dp))
-                    // نمایش مجموع قیمت سفارش‌ها
-                    Text(
-                        text = "مجموع قیمت سفارش‌ها: " + formatPrice(userTotal) + " تومان ",
-                        fontSize = 16.sp,
-                        fontFamily = vazirFontFamily,
-                        modifier = Modifier.padding(10.dp)
-                    )
-
-                    // نمایش تعداد سفارش‌های موفق
-                    Text(
-                        text = "تعداد سفارش‌های موفق: "+ userSuccessOrder,
-                        fontSize = 16.sp,
-                        fontFamily = vazirFontFamily,
-                        modifier = Modifier.padding(10.dp)
-                    )
-
-                    // نمایش تعداد سفارش‌های لغو شده
-                    Text(
-                        text = "تعداد سفارش‌های لغو شده: "+ userFailedOrder,
-                        fontSize = 16.sp,
-                        fontFamily = vazirFontFamily,
-                        modifier = Modifier.padding(10.dp)
-                    )
-
-                    Spacer(modifier = Modifier.fillMaxWidth().height(16.dp))
-
-                    OutlinedButton(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(10.dp),
-                        onClick = {
-                            navController.navigate("user/orders/all")
-                        }
-                    ) {
-                        Text(
-                            text = "تاریخچه سفارش های کاربر",
-                            fontSize = 18.sp,
-                            fontFamily = vazirFontFamily
-                        )
-                    }
-
-                    // دکمه "تماس با ما"
-                    OutlinedButton(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(10.dp),
-                        onClick = {
-
-                            val dialIntent = Intent(Intent.ACTION_DIAL, Uri.parse("tel:+989991112233"))
-                            m_context.startActivity(dialIntent)
-                        }
-                    ) {
-                        Text(
-                            text = "تماس با ما",
-                            fontSize = 18.sp,
-                            fontFamily = vazirFontFamily
-                        )
-                    }
-
-                    // دکمه "درباره ما"
-                    OutlinedButton(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(10.dp),
-                        onClick = {
-                            // اضافه کردن عملکرد مورد نظر برای "درباره ما"
-                            navController.navigate("home/about/us")
-                        }
-                    ) {
-                        Text(
-                            text = "درباره ما",
-                            fontSize = 18.sp,
-                            fontFamily = vazirFontFamily
-                        )
-                    }
-
-
-                    Spacer(modifier = Modifier.fillMaxWidth().height(25.dp))
-                }
-
             }
         }
     }
 }
-
-

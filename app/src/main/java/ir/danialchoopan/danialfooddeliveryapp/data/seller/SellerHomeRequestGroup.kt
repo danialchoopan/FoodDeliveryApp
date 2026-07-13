@@ -1,4 +1,4 @@
-package ir.nimaali.nimafooddeliveryapp.data.seller
+package ir.danialchoopan.danialfooddeliveryapp.data.seller
 
 import android.content.Context
 import com.android.volley.Response
@@ -6,11 +6,11 @@ import com.android.volley.toolbox.JsonArrayRequest
 import com.android.volley.toolbox.JsonObjectRequest
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
-import ir.nimaali.nimafooddeliveryapp.data.RequestEndPoints
-import ir.nimaali.nimafooddeliveryapp.data.VolleySingleTon
-import ir.nimaali.nimafooddeliveryapp.models.seller.dash.SellerOrdersDashShowItem
-import ir.nimaali.nimafooddeliveryapp.models.seller.dash.orderDetail.SellerOrderDetailByid
-import ir.nimaali.nimafooddeliveryapp.models.user.order.UserOrderDetail
+import ir.danialchoopan.danialfooddeliveryapp.data.RequestEndPoints
+import ir.danialchoopan.danialfooddeliveryapp.data.VolleySingleTon
+import ir.danialchoopan.danialfooddeliveryapp.models.seller.dash.SellerOrdersDashShowItem
+import ir.danialchoopan.danialfooddeliveryapp.models.seller.dash.orderDetail.SellerOrderDetailByid
+import ir.danialchoopan.danialfooddeliveryapp.models.user.order.UserOrderDetail
 import org.json.JSONObject
 
 class SellerHomeRequestGroup(val m_context: Context) {

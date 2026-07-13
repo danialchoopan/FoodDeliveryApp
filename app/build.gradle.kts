@@ -5,11 +5,11 @@ plugins {
 }
 
 android {
-    namespace = "ir.danialchoopan.nimafooddeliveryapp"
+    namespace = "ir.danialchoopan.danialfooddeliveryapp"
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "ir.nimaali.nimafooddeliveryapp"
+        applicationId = "ir.danialchoopan.danialfooddeliveryapp"
         minSdk = 27
         targetSdk = 34
         versionCode = 1
@@ -68,8 +68,6 @@ dependencies {
     //Glide
     implementation("com.github.bumptech.glide:compose:1.0.0-alpha.1")
 
-
     //Persian Date Picker
     implementation("com.github.razaghimahdi:Compose-Persian-Date-Picker:1.1.1")
-
 }
